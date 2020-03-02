@@ -29,7 +29,15 @@ Yfill = fillmissing(Y, 'constant', 0); %replace NaN
 %% show modes
 
 figure
+Xcrop=data.deg_48.InterpCommon.Xcrop;
+Ycrop=data.deg_48.InterpCommon.Ycrop;
 for k = 1:4
     subplot(1,4,k)
-    imagesc(reshape(U(:,k), [nx ny]))
+    pcolor(Xcrop,Ycrop,reshape(U(:,k), [nx ny]))
+    hold on
+    plot(data.deg_48.InterpCommon.foil)
+    shading flat
+    axis equal
+    axis tight
+    colorbar
 end
