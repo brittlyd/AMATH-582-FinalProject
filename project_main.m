@@ -1,4 +1,4 @@
-clear all, close all
+% clear all, close all
 
 %load data
 load('up1_1 Crop.mat')
@@ -29,15 +29,22 @@ Yfill = fillmissing(Y, 'constant', 0); %replace NaN
 %% show modes
 
 figure
+set(gcf,'position',[331.8571  238.1429  822.8571  481.8571])
 Xcrop=data.deg_48.InterpCommon.Xcrop;
 Ycrop=data.deg_48.InterpCommon.Ycrop;
+[ha pos]= tight_subplot(2,2,[.05 .15],[.1 .01],[.1 .1]);
 for k = 1:4
-    subplot(1,4,k)
+    axes(ha(k))
     pcolor(Xcrop,Ycrop,reshape(U(:,k), [nx ny]))
     hold on
-    plot(data.deg_48.InterpCommon.foil)
+    plot(data.deg_48.InterpCommon.foil,'facecolor',[0 0 0],'facealpha',0.5...
+        ,'edgecolor','none')
+    title(strcat('mode ', num2str(k)))
+    xlabel('x/c')
+    ylabel('y/c')
     shading flat
     axis equal
     axis tight
     colorbar
+    set(gca,'position',pos{k})
 end
