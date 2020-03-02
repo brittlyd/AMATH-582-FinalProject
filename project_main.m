@@ -32,7 +32,7 @@ figure
 set(gcf,'position',[331.8571  238.1429  822.8571  481.8571])
 Xcrop=data.deg_48.InterpCommon.Xcrop;
 Ycrop=data.deg_48.InterpCommon.Ycrop;
-[ha pos]= tight_subplot(2,2,[.05 .15],[.1 .01],[.1 .1]);
+[ha, pos]= tight_subplot(2,2,[.05 .15],[.1 .01],[.1 .1]);
 for k = 1:4
     axes(ha(k))
     pcolor(Xcrop,Ycrop,reshape(U(:,k), [nx ny]))
