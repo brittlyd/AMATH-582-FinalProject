@@ -15,12 +15,9 @@ if ~isempty(v) %%% if there are two arrays in X
     u_new_vec = zeros(size(u,1)*size(u,2),1);
     v_new_vec = zeros(size(v,1)*size(v,2),1);
 
-    %%% Reshape mask logicals into a column vector
-    mask_log=reshape(mask_log,size(u,1)*size(u,2),1);
-    
     %%% Replace mask indices with NaNs
-    u_new_vec(mask_log) = NaN;
-    v_new_vec(mask_log) = NaN;
+    u_new_vec(mask_ind) = NaN;
+    v_new_vec(mask_ind) = NaN;
 
     %%% Fill in the rest of the vectors with data
     u_new_vec(~isnan(u_new_vec)) = u_vec;
