@@ -6,28 +6,29 @@
 %%% values). 
 
 function [X,mask_log] = stackPCA(u,v,nx,ny,mask_ind)
-%%% Subtract mean of the frame from each element
-mean_u = repmat(mean(u,'all','omitnan'),size(u));
-u = u-mean_u;
-
 %%% Turns mask_ind into logical. Need to reshpape the mask_ind vector as ny
 %%% by nx. Also need to transpose. This works because of the way
 %%% matlab indexes matricies and how I wrote everything in my PIV
 %%% processing code. Commented out, but can plot after to show the mask (yellow area). The result
 %%% mask_log is a matrix of logicals that is nx by ny which is the same size as the
 %%% velocity fields
+
+% Subtract mean of the frame from each element
+mean_u = repmat(mean(u,'all','omitnan'),size(u));
+u = u-mean_u;
+
 mask_log=zeros(nx*ny,1);
 mask_log(mask_ind)=1;
-mask_log=reshape(mask_log,[ny,nx])';
-figure
-pcolor(mask_log')
-axis equal
-figure
-pcolor(u')
-axis equal
+mask_log=logical(reshape(mask_log,[ny,nx])');
+%figure
+% pcolor(mask_log')
+% axis equal
+% figure
+% pcolor(u')
+% axis equal
 
 %%% Remove indices for mask
-u_vec(mask_ind) = [];
+u(mask_log) = [];
 
 %%% Reshape into a column vector
 u_vec = reshape(u,[],1);
