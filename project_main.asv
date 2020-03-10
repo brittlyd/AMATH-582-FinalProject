@@ -6,14 +6,14 @@ rotFields = fieldnames(data);
 nRot = length(rotFields);
 nx = 52;
 ny = 52;
-Y = zeros(nx*ny*2, nRot);
+Y = zeros(nx*ny, nRot);
 for iRot = 1:nRot
     %Y(:,iRot) = reshape(data.(rotFields{iRot}).Interp.Vort_crop, [nx*ny 1]);
     %Y(:,iRot) = reshape(data.(rotFields{iRot}).InterpCommon.Vmag_crop, [nx*ny 1]);
-%     Y(:,iRot) = reshape(data.(rotFields{iRot}).Interp.Vmag_crop, [nx*ny 1]);
+    Y(:,iRot) = reshape(data.(rotFields{iRot}).Interp.Vmag_crop, [nx*ny 1]);
     U = reshape(data.(rotFields{iRot}).Interp.U_crop, [nx*ny 1]);
     V = reshape(data.(rotFields{iRot}).Interp.V_crop, [nx*ny 1]);
-    Y(:,iRot) = [U;V];
+    YUV(:,iRot) = [Y,U]'
 end
 
 figure
