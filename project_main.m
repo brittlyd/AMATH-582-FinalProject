@@ -15,12 +15,14 @@ mask_ind = up1_1FULL.deg_30.mask_inds;
 for iRot = 1:nRot
     u = up1_1FULL.(rotFields{iRot}).u;
     v = up1_1FULL.(rotFields{iRot}).v;
-    lambda = 1; % choose your sparsity constant value (1 is often a good starting point)
+    lambda = 4; % choose your sparsity constant value (1 is often a good starting point)
     tol = 1e-7; % set your tolerance
     maxIter = 1000; % set your maximum number of iterations
-    [up1_1FULL.(rotFields{iRot}).uL, up1_1FULL.(rotFields{iRot}).vL, up1_1FULL.(rotFields{iRot}).uN, up1_1FULL.(rotFields{iRot}).vN] ... 
+    [up1_1FULL.(rotFields{iRot}).L, up1_1FULL.(rotFields{iRot}).N,...
+        up1_1FULL.(rotFields{iRot}).uL, up1_1FULL.(rotFields{iRot}).vL, up1_1FULL.(rotFields{iRot}).uN, up1_1FULL.(rotFields{iRot}).vN] ... 
         = rPCA_main(u,v,nx,ny, mask_ind, lambda, tol, maxIter);
 end
+lambdaCheck(up1_1FULL.deg_30.uL, up1_1FULL.deg_30.vL, up1_1FULL.deg_30.uN, up1_1FULL.deg_30.vN, lambda)
 %% SVD without rPCA
 
 %load data

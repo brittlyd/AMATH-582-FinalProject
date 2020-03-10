@@ -1,4 +1,4 @@
-function [uL, vL, uN, vN] = rPCA_main(u,v,nx,ny, mask_ind, lambda, tol, maxIter)
+function [L, N, uL, vL, uN, vN] = rPCA_main(u,v,nx,ny, mask_ind, lambda, tol, maxIter)
 % inputs
 % u,v are velocity fields with dimensions nx, ny
 % mask_ind is locations that should remain NaNs after processing
