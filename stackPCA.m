@@ -44,8 +44,10 @@ else
     mean_v = repmat(mean(v,'all','omitnan'),size(v));
     v = v-mean_v;
     
+    %%% Remove indices for mask
+    v(mask_log) = [];
+
     v_vec = reshape(v,[],1);
-    v_vec(mask_ind) = [];
     
     ind_nan_no_mask_v = isnan(v_vec);
     v_vec(ind_nan_no_mask_v) = randi([5 10],sum(ind_nan_no_mask_v),1);
