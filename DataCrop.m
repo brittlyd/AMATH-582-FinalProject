@@ -42,7 +42,6 @@ for i=a+1:length(names)-b
     foilrot=rotate(data.(names{i}).foil,angle...
         ,[data.(names{i}).shaftX,data.(names{i}).shaftY]);
     
-    
     %Crop Field
     [xbound,ybound]=boundingbox(foilrot);
     xbound(1)=xbound(1)+chord/15; %Grow the crop boundary and change Aspect Ratio
