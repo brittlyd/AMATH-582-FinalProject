@@ -1,4 +1,4 @@
-% clear all, close all
+clear all, close all
 
 %load data
 load("C:\Users\abber\Documents\School\Grad School\Winter 20\AMATH 582\Project\Mukul flow_data Crop.mat")
@@ -6,21 +6,22 @@ nRot = length(data);
 nRot = 32; %for just upstream portion
 nx = 52;
 ny = 52;
-mask=data(1).Interp.mask; %should all have the same mask (all from the blade)
+mask=data(1).Interp.mask;
 for iRot = 1:nRot
     %Y(:,iRot) = reshape(data(iRot).Interp.Vort_crop, [nx*ny 1]);
     %Y(:,iRot) = reshape(data(iRot).InterpCommon.Vmag_crop, [nx*ny 1]);
-    Y(:,iRot) = reshape(data(iRot).Interp.Vmag_crop(~mask),[],1);
+    Y(:,iRot) = reshape(data(iRot).Interp.Vmag_crop,[],1);
 end
 
 figure
-set(gcf,'position',[331.8571   91.2857  741.1429  628.7143])
+set(gcf,'position',1.0e+03 *[0.0016    0.2079    1.4600    0.5120])
 Xcrop=data(1).Interp.Xcrop;
 Ycrop=data(1).Interp.Ycrop;
-[ha, pos]= tight_subplot(2,4,[.05 0.1],[.1 .01],[.01 .1]);
+[ha, pos]= tight_subplot(2,4,[0 0],[.01 .01],[.01 .01]);
 p=1;
 for n=2:4:nRot
     axes(ha(p))
+    ax=gca;
     tmpU=data(n).Interp.U_crop;
     tmpU(mask)=NaN;
     tmpV=data(n).Interp.V_crop;
@@ -32,13 +33,12 @@ for n=2:4:nRot
     quiver(data(n).Interp.Xcrop,data(n).Interp.Ycrop,tmpU,tmpV,2,'k')
     plot(data(n).Interp.foil,'facecolor',[0 0 0],'facealpha',0.5...
         ,'edgecolor','none')
-    xlabel('x/c')
-    ylabel('y/c')
+    ax.XAxis.Visible='off';
+    ax.YAxis.Visible='off';
     title(strcat('\theta= ',num2str(data(n).theta)))
     axis equal
     axis tight
     shading interp
-    colorbar
     caxis([0,3])
     set(gca,'position',pos{p})
     p=p+1;
@@ -49,7 +49,7 @@ end
 
 Yavg = mean(Y,2,'omitnan'); % compute row mean for subtraction
 Yms = Y-Yavg*ones(1,size(Y,2)); % Y mean-subtracted
-% Yfill = fillmissing(Yms, 'constant', 0); %replace NaN
+% Yms = fillmissing(Yms, 'constant', 0); %replace NaN
 
 [U,S,V] = svd(Yms,'econ');
 sig=diag(S);
@@ -84,6 +84,16 @@ grid on
 print(gcf,'Energy Cropped','-dpng','-r600')
 
 %% show modes
+%put NaNs back in
+
+% Ynan = ismissing(Y);
+% nanRow = sum(Ynan,2); % number of NaNs in each row
+% th = 4; % threshold for number of NaNs allowed before row is masked
+% for iRow = 1:size(Y,1)
+%     if nanRow(iRow) > th
+%         U(iRow,:) = NaN;
+%     end
+% end
 figure
 set(gcf,'position',[331.8571   91.2857  741.1429  628.7143])
 Xcrop=data(1).Interp.Xcrop;
@@ -93,6 +103,7 @@ p=1;
 for k = [1:5,ind]
     axes(ha(p))
     %Put NaNs back in
+%     mode=U(:,k);
     mode=zeros(nx*ny,1);
     mode(~mask)=U(:,k);
     mode(mask)=NaN;

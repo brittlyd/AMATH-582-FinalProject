@@ -6,7 +6,7 @@ nRot = length(data);
 nRot = 32; %for just upstream portion
 nx = 52;
 ny = 52;
-mask=data(1).Interp.mask; %should all have the same mask (all from the blade)
+mask=data(1).Interp.mask;
 for iRot = 1:nRot
     %Y(:,iRot) = reshape(data(iRot).Interp.Vort_crop, [nx*ny 1]);
     %Y(:,iRot) = reshape(data(iRot).InterpCommon.Vmag_crop, [nx*ny 1]);
@@ -49,7 +49,7 @@ end
 
 Yavg = mean(Y,2,'omitnan'); % compute row mean for subtraction
 Yms = Y-Yavg*ones(1,size(Y,2)); % Y mean-subtracted
-% Yfill = fillmissing(Yms, 'constant', 0); %replace NaN
+% Yms = fillmissing(Yms, 'constant', 0); %replace NaN
 
 [U,S,V] = svd(Yms,'econ');
 sig=diag(S);
@@ -84,6 +84,16 @@ grid on
 print(gcf,'Energy Cropped','-dpng','-r600')
 
 %% show modes
+%put NaNs back in
+
+% Ynan = ismissing(Y);
+% nanRow = sum(Ynan,2); % number of NaNs in each row
+% th = 4; % threshold for number of NaNs allowed before row is masked
+% for iRow = 1:size(Y,1)
+%     if nanRow(iRow) > th
+%         U(iRow,:) = NaN;
+%     end
+% end
 figure
 set(gcf,'position',[331.8571   91.2857  741.1429  628.7143])
 Xcrop=data(1).Interp.Xcrop;
@@ -93,6 +103,7 @@ p=1;
 for k = [1:5,ind]
     axes(ha(p))
     %Put NaNs back in
+%     mode=U(:,k);
     mode=zeros(nx*ny,1);
     mode(~mask)=U(:,k);
     mode(mask)=NaN;
