@@ -1,6 +1,4 @@
-<<<<<<< HEAD
-clear all, close all
-=======
+
 
 %% rPCA
 clear all, close all
@@ -27,13 +25,11 @@ for iRot = 1:nRot
 end
 lambdaCheck(up1_1FULL.deg_30.uL, up1_1FULL.deg_30.vL, up1_1FULL.deg_30.uN, up1_1FULL.deg_30.vN, lambda)
 %% SVD without rPCA
->>>>>>> master
 
 run='Abby'; %what to append to all plot saving so things don't get overwritten between data sets
 %load data
 load("C:\Users\abber\Documents\School\Grad School\Winter 20\AMATH 582\Project\up1_1 Crop.mat")
 rotFields = fieldnames(data);
-nRot = length(rotFields);
 nx = 52;
 ny = 52;
 uv = 1; %if 1 run for u and v, if 0 run for vmag
