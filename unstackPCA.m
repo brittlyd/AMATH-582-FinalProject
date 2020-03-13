@@ -33,7 +33,8 @@ if vExist %%% if there are two arrays in X
 else %%% if there is only one array in X
     %%% Do the same thing but for one array
     u_new_vec = zeros(nx*ny,1);
-    u_new_vec(mask_ind) = NaN;
+    u_new_vec(mask_log) = NaN;
     u_new_vec(~isnan(u_new_vec)) = X;
     u_new = reshape(u_new_vec,[nx ny]);
+    v_new = [];
 end
