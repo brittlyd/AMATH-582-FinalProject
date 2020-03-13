@@ -13,9 +13,6 @@ function [X,mask_log] = stackPCA(u,v,nx,ny,mask_ind)
 %%% mask_log is a matrix of logicals that is nx by ny which is the same size as the
 %%% velocity fields
 
-% Subtract mean of the frame from each element
-mean_u = repmat(mean(u,'all','omitnan'),size(u));
-u = u-mean_u;
 
 mask_log=zeros(nx*ny,1);
 mask_log(mask_ind)=1;
@@ -41,11 +38,11 @@ if isempty(v) %%% if there is no second array
     X = u_vec; %%% return the vector 
 else 
     %%% Do the same thing for v if it exists
-    mean_v = repmat(mean(v,'all','omitnan'),size(v));
-    v = v-mean_v;
     
+    %%% Remove indices for mask
+    v(mask_log) = [];
+
     v_vec = reshape(v,[],1);
-    v_vec(mask_ind) = [];
     
     ind_nan_no_mask_v = isnan(v_vec);
     v_vec(ind_nan_no_mask_v) = randi([5 10],sum(ind_nan_no_mask_v),1);
