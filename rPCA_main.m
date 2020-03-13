@@ -13,17 +13,17 @@ nt = size(u,3); % number of frames
 if isv
     X = zeros((nx*ny-length(mask_ind))*2, nt); % data matrix
     for i = 1:nt
-        [X(:,i),mask_log(:,:,i)] = stackPCA(u(:,:,i),v(:,:,i),nx,ny,mask_ind);
+        [X(:,i),mask_log(:,:,i)] = stackPCA2(u(:,:,i),v(:,:,i),nx,ny,mask_ind);
     end
 else
     X = zeros((nx*ny-length(mask_ind)), nt);
     for i = 1:nt
-        [X(:,i),mask_log(:,:,i)] = stackPCA(u(:,:,i),[],nx,ny,mask_ind);
+        [X(:,i),mask_log(:,:,i)] = stackPCA2(u(:,:,i),[],nx,ny,mask_ind);
     end
 end
 
-avgX = mean(X,2)*ones(1,size(X,2));
-X = X - avgX;
+% avgX = mean(X,2)*ones(1,size(X,2));
+% X = X - avgX;
 %% rPCA
 addpath(genpath('RPCA-PIV-master'));
 
