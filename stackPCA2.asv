@@ -5,7 +5,7 @@
 %%% the remaining NaNs are replaced with outliers (very large, positive
 %%% values). 
 
-function [X,mask_log] = stackPCA2(u,v,nx,ny,mask_ind,fl)
+function [X,mask_log] = stackPCA2(u,v,nx,ny,mask_ind)
 %%% Turns mask_ind into logical. Need to reshpape the mask_ind vector as ny
 %%% by nx. Also need to transpose. This works because of the way
 %%% matlab indexes matricies and how I wrote everything in my PIV
@@ -17,8 +17,8 @@ function [X,mask_log] = stackPCA2(u,v,nx,ny,mask_ind,fl)
 mask_log=zeros(nx*ny,1);
 mask_log(mask_ind)=1;
 mask_log=logical(reshape(mask_log,[ny,nx])');
-if fl
-    mask_log=fliplr(mask_log);
+if flip
+    mask_log=flipud(mask_log)
 end
 %figure
 % pcolor(mask_log')

@@ -4,8 +4,10 @@ clear all, close all
 plain=0; %1 for plain PCA 0 for rPCA
 uv=1; %1 for uv and 0 for vmag
 workingfolder= 'C:\Users\abber\Documents\School\Grad School\Winter 20\AMATH 582\Project';
+chord=4.06*10; %chord length in mm
 
 if plain
+t=0; %truncation
 run='Abby'; %what to append to all plot saving so things don't get overwritten between data sets
 %load data
 load(fullfile(workingfolder,'up1_1 Crop.mat'))
@@ -25,6 +27,7 @@ end
 
 %% rPCA
 if ~plain
+t=2; %truncation
 run='AbbyRPCA'; %what to append to all plot saving so things don't get overwritten between data sets
 
 % load data, initialize
@@ -51,8 +54,13 @@ for iRot = 1:nRot
     lambda = 5; % choose your sparsity constant value (1 is often a good starting point)
     tol = 1e-7; % set your tolerance
     maxIter = 1000; % set your maximum number of iterations
+    if iRot>(7+t)
+        fl=1; %because of data rotation we need to flip the mask left to right
+    else
+        fl=0;
+    end
     [up1_1FULL.(rotFields{iRot}).L, up1_1FULL.(rotFields{iRot}).N,mask_log(:,:,iRot)] ... 
-        = rPCA_main(u,v,nxFull,nyFull, mask_ind, lambda, tol, maxIter);
+        = rPCA_main(u,v,nxFull,nyFull, mask_ind, lambda, tol, maxIter,fl);
     % average all columns of L,N to get "rPCA cleaned" phase average
     up1_1FULL.(rotFields{iRot}).Lr = mean(up1_1FULL.(rotFields{iRot}).L,2);
     up1_1FULL.(rotFields{iRot}).Nr = mean(up1_1FULL.(rotFields{iRot}).N,2);
@@ -63,8 +71,8 @@ for iRot = 1:nRot
         unstackPCA(up1_1FULL.(rotFields{iRot}).Nr,nxFull,nyFull,mask_log(:,:,iRot),1);
 end
 % checks for rPCA
-lambdaCheck(up1_1FULL.deg_30.uL, up1_1FULL.deg_30.vL,up1_1FULL.deg_30.uN...
-    , up1_1FULL.deg_30.vN, lambda)
+% lambdaCheck(up1_1FULL.deg_30.uL, up1_1FULL.deg_30.vL,up1_1FULL.deg_30.uN...
+%     , up1_1FULL.deg_30.vN, lambda)
 
 % save post rPCA structure
 save(fullfile(workingfolder,'up1_1FULL rPCA'),'up1_1FULL')
@@ -85,7 +93,7 @@ caxis([-1.5 2])
 colorbar
 
 % Crops data for PCA
-DataCrop_rPCA(fullfile(workingfolder,'up1_1FULL rPCA'),2,0)
+DataCrop_rPCA(fullfile(workingfolder,'up1_1FULL rPCA'),t,0)
 load(fullfile(workingfolder,'up1_1FULL rPCA Crop.mat'))
 rotFields = fieldnames(data);
 nRot = length(rotFields);
@@ -100,17 +108,39 @@ for iRot = 1:nRot
     if uv
         u = reshape(data.(rotFields{iRot}).interp.u_crop, [nx*ny 1]);
         v = reshape(data.(rotFields{iRot}).interp.v_crop, [nx*ny 1]);
-        figure(3); clf(3)
-        subplot(1,2,2)
-    pcolor(data.(rotFields{iRot}).interp.xcrop...
-        ,data.(rotFields{iRot}).interp.ycrop,data.(rotFields{iRot}).interp.u_crop)
-    hold on
-    plot(data.(rotFields{iRot}).interp.foil)
-    shading interp
-    axis equal
-    axis tight
-    
-    pause(0.1)
+%         figure(3); clf(3)
+%         subplot(1,4,4)
+%     pcolor(data.(rotFields{iRot}).interp.xcrop...
+%         ,data.(rotFields{iRot}).interp.ycrop,data.(rotFields{iRot}).interp.u_crop)
+%     hold on
+%     plot(data.(rotFields{iRot}).interp.foil)
+%     shading flat
+%     axis equal
+%     axis tight
+%     subplot(1,4,3)
+%     pcolor(data.(rotFields{iRot}).x/chord...
+%         ,data.(rotFields{iRot}).y/chord,data.(rotFields{iRot}).uL')
+%     hold on
+%     plot(data.(rotFields{iRot}).foil)
+%     shading flat
+%     axis equal
+%     axis tight
+%     subplot(1,4,2)
+%     pcolor(data.(rotFields{iRot}).x/chord...
+%         ,data.(rotFields{iRot}).y/chord,data.(rotFields{iRot}).u_avg')
+%     hold on
+%     plot(data.(rotFields{iRot}).foil)
+%     shading flat
+%     axis equal
+%     axis tight
+%     subplot(1,4,1)
+%     pcolor(fliplr(mask_log(:,:,iRot+t)'))
+%     hold on
+%     plot(data.(rotFields{iRot}).foil)
+%     shading flat
+%     axis equal
+%     axis tight
+%     pause(0.5)
         Y(:,iRot) = [u;v];
     else
         Y(:,iRot) = reshape(data.(rotFields{iRot}).interp.vmag_crop, [nx*ny 1]);
