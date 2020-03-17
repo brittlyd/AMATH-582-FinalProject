@@ -1,43 +1,63 @@
-
-
-%% rPCA
 clear all, close all
-% load data, initialize
-filename = 'up1_1FULL.mat';
-load(filename)
-rotFields = fieldnames(up1_1FULL);
-nRot = length(rotFields);
+%% Setup
+%Choose if doing plain PCA or rPCA and with uv or with vmag
+plain=0; %1 for plain PCA 0 for rPCA
+uv=1; %1 for uv and 0 for vmag
 
-% keep these variables outside loop if same for all rotations
-nx = up1_1FULL.deg_30.nx; 
-ny = up1_1FULL.deg_30.ny;
-mask_ind = up1_1FULL.deg_30.mask_inds;
-
-for iRot = 1:nRot
-    u = up1_1FULL.(rotFields{iRot}).u;
-    v = up1_1FULL.(rotFields{iRot}).v;
-    lambda = 4; % choose your sparsity constant value (1 is often a good starting point)
-    tol = 1e-7; % set your tolerance
-    maxIter = 1000; % set your maximum number of iterations
-    [up1_1FULL.(rotFields{iRot}).L, up1_1FULL.(rotFields{iRot}).N,...
-        up1_1FULL.(rotFields{iRot}).uL, up1_1FULL.(rotFields{iRot}).vL, up1_1FULL.(rotFields{iRot}).uN, up1_1FULL.(rotFields{iRot}).vN] ... 
-        = rPCA_main(u,v,nx,ny, mask_ind, lambda, tol, maxIter);
-end
-lambdaCheck(up1_1FULL.deg_30.uL, up1_1FULL.deg_30.vL, up1_1FULL.deg_30.uN, up1_1FULL.deg_30.vN, lambda)
-%% SVD without rPCA
-
+if plain
 run='Abby'; %what to append to all plot saving so things don't get overwritten between data sets
 %load data
 load("C:\Users\abber\Documents\School\Grad School\Winter 20\AMATH 582\Project\up1_1 Crop.mat")
 rotFields = fieldnames(data);
-nx = 52;
+nRot = length(rotFields);
+%prep for PCA
+nx = 52; %size of the cropped fields that go into the SVD
 ny = 52;
-uv = 1; %if 1 run for u and v, if 0 run for vmag
 if uv
 Y = zeros(nx*ny*2, nRot);
 else
 Y = zeros(nx*ny, nRot);
 end
+end
+
+%% rPCA
+if ~plain
+run='AbbyRPCA'; %what to append to all plot saving so things don't get overwritten between data sets
+
+% load data, initialize
+filename = "C:\Users\abber\Documents\School\Grad School\Winter 20\AMATH 582\Project\up1_1FULL.mat";
+load(filename)
+rotFields = fieldnames(up1_1FULL);
+nRot = length(rotFields);
+%prep for PCA
+nx = 52; %size of the cropped fields that go into the SVD
+ny = 52;
+if uv
+Y = zeros(nx*ny*2, nRot);
+else
+Y = zeros(nx*ny, nRot);
+end
+
+% keep these variables outside loop if same for all rotations
+nxFull = up1_1FULL.deg_30.nx; 
+nyFull = up1_1FULL.deg_30.ny;
+mask_ind = up1_1FULL.deg_30.mask_inds;
+
+for iRot = 1:nRot
+    u = up1_1FULL.(rotFields{iRot}).u;
+    v = up1_1FULL.(rotFields{iRot}).v;
+    lambda = 2; % choose your sparsity constant value (1 is often a good starting point)
+    tol = 1e-7; % set your tolerance
+    maxIter = 1000; % set your maximum number of iterations
+    [up1_1FULL.(rotFields{iRot}).L, up1_1FULL.(rotFields{iRot}).N,...
+        up1_1FULL.(rotFields{iRot}).uL, up1_1FULL.(rotFields{iRot}).vL, up1_1FULL.(rotFields{iRot}).uN, up1_1FULL.(rotFields{iRot}).vN] ... 
+        = rPCA_main(u,v,nxFull,nyFull, mask_ind, lambda, tol, maxIter);
+end
+lambdaCheck(up1_1FULL.deg_30.uL, up1_1FULL.deg_30.vL, up1_1FULL.deg_30.uN...
+    , up1_1FULL.deg_30.vN, lambda)
+end
+%% SVD 
+
 for iRot = 1:nRot
     %Y(:,iRot) = reshape(data.(rotFields{iRot}).Interp.Vort_crop, [nx*ny 1]);
     %Y(:,iRot) = reshape(data.(rotFields{iRot}).InterpCommon.Vmag_crop, [nx*ny 1]);
@@ -138,12 +158,12 @@ Ureplaced(nanRow>th,:)=NaN;
 Ureplaced(~(nanRow>th),:)=U;
 
 f=figure;
-set(f,'position',[331.8571  238.1429  822.8571  481.8571])
-[ha, pos]= tight_subplot(2,2,[.05 .15],[.1 .01],[.1 .1]);
+set(f,'position',[331.8571   13.5714  822.8571  706.4286])
+[ha, pos]= tight_subplot(3,2,[.05 .15],[.1 .01],[.1 .1]);
 f2=figure;
-set(gcf,'position',[331.8571  238.1429  822.8571  481.8571])
-[ha2, pos2]= tight_subplot(2,2,[.05 .15],[.1 .01],[.1 .1]);
-for k = 1:4
+set(f2,'position',[331.8571   13.5714  822.8571  706.4286])
+[ha2, pos2]= tight_subplot(3,2,[.05 .15],[.1 .01],[.1 .1]);
+for k = 1:6
     f
     axes(ha(k))
     %Put NaNs back in

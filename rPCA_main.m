@@ -24,6 +24,6 @@ addpath(genpath('RPCA-PIV-master'));
 
 %% put mask back in
 isv =  ~isempty(v); %check if there are two arrays
-    
+
 [uL,vL] = unstackPCA(L(:,1),nx,ny,mask_log(:,:,1),isv);
 [uN,vN] = unstackPCA(N(:,1),nx,ny,mask_log(:,:,1),isv);
