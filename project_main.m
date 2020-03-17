@@ -55,6 +55,49 @@ for iRot = 1:nRot
 end
 lambdaCheck(up1_1FULL.deg_30.uL, up1_1FULL.deg_30.vL, up1_1FULL.deg_30.uN...
     , up1_1FULL.deg_30.vN, lambda)
+    lambda = 5; % choose your sparsity constant value (1 is often a good starting point)
+    tol = 1e-7; % set your tolerance
+    maxIter = 1000; % set your maximum number of iterations
+    [up1_1FULL.(rotFields{iRot}).L, up1_1FULL.(rotFields{iRot}).N,mask_log] ... 
+        = rPCA_main(u,v,nx,ny, mask_ind, lambda, tol, maxIter);
+    % average all columns of L,N to get "rPCA cleaned" phase average
+    up1_1FULL.(rotFields{iRot}).Lr = mean(up1_1FULL.(rotFields{iRot}).L,2);
+    up1_1FULL.(rotFields{iRot}).Nr = mean(up1_1FULL.(rotFields{iRot}).N,2);
+end
+% checks for rPCA
+% put mask back in
+[uL,vL] = unstackPCA(up1_1FULL.deg_30.Lr,nx,ny,mask_log(:,:,1),1);
+[uN,vN] = unstackPCA(up1_1FULL.deg_30.Nr,nx,ny,mask_log(:,:,1),1);
+lambdaCheck(uL, vL,uN, vN, lambda)
+
+figure
+subplot(2,2,1)
+pcolor(up1_1FULL.deg_30.u_avg)
+title('u avg')
+shading flat
+caxis([-1.5 2])
+colorbar
+
+subplot(2,2,3)
+pcolor(up1_1FULL.deg_30.v_avg)
+title('v avg')
+shading flat
+caxis([-1.5 2])
+colorbar
+%% SVD without rPCA
+
+run='Abby'; %what to append to all plot saving so things don't get overwritten between data sets
+%load data
+load("C:\Users\abber\Documents\School\Grad School\Winter 20\AMATH 582\Project\up1_1 Crop.mat")
+rotFields = fieldnames(data);
+nx = 52;
+ny = 52;
+uv = 1; %if 1 run for u and v, if 0 run for vmag
+if uv
+Y = zeros(nx*ny*2, nRot);
+else
+Y = zeros(nx*ny, nRot);
+>>>>>>> 6e4fb741d9ebd16cc5b0e80dd8b8d7343533fcb9
 end
 %% SVD 
 

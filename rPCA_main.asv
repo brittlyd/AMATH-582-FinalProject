@@ -4,6 +4,8 @@ function [L, N, mask_log] = rPCA_main(u,v,nx,ny, mask_ind, lambda, tol, maxIter)
 % mask_ind is locations that should remain NaNs after processing
 % v can be empty 
 
+
+
 isv =  ~isempty(v); %check if there are two arrays
 %% Remove mask, replace other NaNs with outliers
 
