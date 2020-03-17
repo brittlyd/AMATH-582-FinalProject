@@ -11,12 +11,14 @@ nt = size(u,3); % number of frames
 if isv
     X = zeros((nx*ny-length(mask_ind))*2, nt); % data matrix
     for i = 1:nt
-        [X(:,i),mask_log(:,:,i)] = stackPCA2(u(:,:,i),v(:,:,i),nx,ny,mask_ind);
+        [X(:,i),mask_log] = stackPCA2(u(:,:,i),v(:,:,i),nx,ny,mask_ind);
+        %each frame for a certain angle has the same mask so we can just
+        %overwrite mask_log each time. We dont need to store each iteration
     end
 else
     X = zeros((nx*ny-length(mask_ind)), nt);
     for i = 1:nt
-        [X(:,i),mask_log(:,:,i)] = stackPCA2(u(:,:,i),[],nx,ny,mask_ind);
+        [X(:,i),mask_log] = stackPCA2(u(:,:,i),[],nx,ny,mask_ind);
     end
 end
 
@@ -26,9 +28,3 @@ end
 addpath(genpath('RPCA-PIV-master'));
 
 [L, N, ~] = inexact_alm_rpca(X, lambda, tol, maxIter); %L is lowrank, N is noise
-
-%% put mask back in
-isv =  ~isempty(v); %check if there are two arrays
-
-[uL,vL] = unstackPCA(L(:,1),nx,ny,mask_log(:,:,1),isv);
-[uN,vN] = unstackPCA(N(:,1),nx,ny,mask_log(:,:,1),isv);

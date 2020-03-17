@@ -3,11 +3,12 @@ clear all, close all
 %Choose if doing plain PCA or rPCA and with uv or with vmag
 plain=0; %1 for plain PCA 0 for rPCA
 uv=1; %1 for uv and 0 for vmag
+workingfolder= 'C:\Users\abber\Documents\School\Grad School\Winter 20\AMATH 582\Project';
 
 if plain
 run='Abby'; %what to append to all plot saving so things don't get overwritten between data sets
 %load data
-load("C:\Users\abber\Documents\School\Grad School\Winter 20\AMATH 582\Project\up1_1 Crop.mat")
+load(fullfile(workingfolder,'up1_1 Crop.mat'))
 rotFields = fieldnames(data);
 nRot = length(rotFields);
 %prep for PCA
@@ -25,8 +26,7 @@ if ~plain
 run='AbbyRPCA'; %what to append to all plot saving so things don't get overwritten between data sets
 
 % load data, initialize
-filename = "C:\Users\abber\Documents\School\Grad School\Winter 20\AMATH 582\Project\up1_1FULL.mat";
-load(filename)
+load(fullfile(workingfolder,'up1_1FULL.mat'))
 rotFields = fieldnames(up1_1FULL);
 nRot = length(rotFields);
 %prep for PCA
@@ -41,22 +41,54 @@ end
 % keep these variables outside loop if same for all rotations
 nxFull = up1_1FULL.deg_30.nx; 
 nyFull = up1_1FULL.deg_30.ny;
-mask_ind = up1_1FULL.deg_30.mask_inds;
 
 for iRot = 1:nRot
     u = up1_1FULL.(rotFields{iRot}).u;
     v = up1_1FULL.(rotFields{iRot}).v;
-    lambda = 2; % choose your sparsity constant value (1 is often a good starting point)
+    mask_ind = up1_1FULL.(rotFields{iRot}).mask_inds;
+    lambda = 5; % choose your sparsity constant value (1 is often a good starting point)
     tol = 1e-7; % set your tolerance
     maxIter = 1000; % set your maximum number of iterations
-    [up1_1FULL.(rotFields{iRot}).L, up1_1FULL.(rotFields{iRot}).N,...
-        up1_1FULL.(rotFields{iRot}).uL, up1_1FULL.(rotFields{iRot}).vL, up1_1FULL.(rotFields{iRot}).uN, up1_1FULL.(rotFields{iRot}).vN] ... 
+    [up1_1FULL.(rotFields{iRot}).L, up1_1FULL.(rotFields{iRot}).N,mask_log(:,:,iRot)] ... 
         = rPCA_main(u,v,nxFull,nyFull, mask_ind, lambda, tol, maxIter);
+    % average all columns of L,N to get "rPCA cleaned" phase average
+    up1_1FULL.(rotFields{iRot}).Lr = mean(up1_1FULL.(rotFields{iRot}).L,2);
+    up1_1FULL.(rotFields{iRot}).Nr = mean(up1_1FULL.(rotFields{iRot}).N,2);
+    % put mask back in
+    [up1_1FULL.(rotFields{iRot}).uL,up1_1FULL.(rotFields{iRot}).vL] = ...
+        unstackPCA(up1_1FULL.(rotFields{iRot}).Lr,nxFull,nyFull,mask_log(:,:,iRot),1);
+    [up1_1FULL.(rotFields{iRot}).uN,up1_1FULL.(rotFields{iRot}).vN] = ...
+        unstackPCA(up1_1FULL.(rotFields{iRot}).Nr,nxFull,nyFull,mask_log(:,:,iRot),1);
 end
-lambdaCheck(up1_1FULL.deg_30.uL, up1_1FULL.deg_30.vL, up1_1FULL.deg_30.uN...
+% checks for rPCA
+lambdaCheck(up1_1FULL.deg_30.uL, up1_1FULL.deg_30.vL,up1_1FULL.deg_30.uN...
     , up1_1FULL.deg_30.vN, lambda)
+
+% save post rPCA structure
+save(fullfile(workingfolder,'up1_1FULL rPCA'),'up1_1FULL')
+
+figure
+subplot(2,2,1)
+pcolor(up1_1FULL.deg_30.u_avg)
+title('u avg')
+shading flat
+caxis([-1.5 2])
+colorbar
+
+subplot(2,2,3)
+pcolor(up1_1FULL.deg_30.v_avg)
+title('v avg')
+shading flat
+caxis([-1.5 2])
+colorbar
+
+% Crops data for PCA
+DataCrop_rPCA(fullfile(workingfolder,'up1_1FULL rPCA'),2,0)
+load(fullfile(workingfolder,'up1_1FULL rPCA Crop.mat'))
+rotFields = fieldnames(data);
+nRot = length(rotFields);
 end
-%% SVD 
+%% Form Y matrix
 
 for iRot = 1:nRot
     %Y(:,iRot) = reshape(data.(rotFields{iRot}).Interp.Vort_crop, [nx*ny 1]);
@@ -70,6 +102,8 @@ for iRot = 1:nRot
     end
 end
 
+%% Vel field plotting
+if plain
 figure
 set(gcf,'position',1.0e+03 *[0.0016    0.2079    1.4600    0.5120])
 xcrop=data.(rotFields{1}).interp.xcrop;
@@ -98,6 +132,7 @@ for n=1:ceil(nRot/8):nRot
     p=p+1;
 end
 print(gcf,strcat('velFields',run),'-dpng','-r600')
+end
 %% mean-subtract and fill in NaNs for SVD
 Yavg = mean(Y,2,'omitnan'); %compute row mean for subtraction
 Yms =Y-Yavg*ones(1,size(Y,2)); % Y mean-subtracted

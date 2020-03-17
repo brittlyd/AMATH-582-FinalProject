@@ -49,7 +49,7 @@ else
     ind_nan_no_mask_v = isnan(v_vec);
     q = randperm(sum(ind_nan_no_mask_v));
     q = (1/max(q))*q;
-    v_vec(ind_nan_no_mask_v) = p;
+    v_vec(ind_nan_no_mask_v) = q;
     
     %%% Concatenate U and V
     X = [u_vec; v_vec];
