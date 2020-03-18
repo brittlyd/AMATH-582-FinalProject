@@ -35,8 +35,7 @@ u_vec = reshape(u,[],1);
 
 %%% Replace remaining NaNs with outliers
 ind_nan_no_mask_u = isnan(u_vec);
-p = randperm(sum(ind_nan_no_mask_u));
-p = (1/max(p))*p;
+p = -1 + 2*rand(sum(ind_nan_no_mask_u),1);
 u_vec(ind_nan_no_mask_u) = p;
 
 if isempty(v) %%% if there is no second array
@@ -50,8 +49,7 @@ else
     v_vec = reshape(v,[],1);
     
     ind_nan_no_mask_v = isnan(v_vec);
-    q = randperm(sum(ind_nan_no_mask_v));
-    q = (1/max(q))*q;
+    q = -1 + 2*rand(sum(ind_nan_no_mask_v),1);
     v_vec(ind_nan_no_mask_v) = q;
     
     %%% Concatenate U and V
