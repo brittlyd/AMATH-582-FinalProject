@@ -192,6 +192,7 @@ p=1;
 for n=1:ceil(nRot/8):nRot
     axes(ha(p))
     ax=gca;
+    set(gca,'Visible','off')
     tmpU=data.(rotFields{n}).interp.u_crop;
     tmpV=data.(rotFields{n}).interp.v_crop;
     tmpVmag=data.(rotFields{n}).interp.vmag_crop;
@@ -210,7 +211,6 @@ for n=1:ceil(nRot/8):nRot
     shading interp
     caxis([0,3])
     set(gca,'position',pos{p})
-    set(gca,'Visible','off')
     p=p+1;
 end
 c=colorbar;

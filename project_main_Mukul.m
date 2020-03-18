@@ -36,6 +36,7 @@ p=1;
 for n=2:4:nRot
     axes(ha(p))
     ax=gca;
+    set(gca,'Visible','off')
     tmpU=data(n).Interp.U_crop;
     tmpV=data(n).Interp.V_crop;
     tmpVmag=data(n).Interp.Vmag_crop;
@@ -54,7 +55,6 @@ for n=2:4:nRot
     shading interp
     caxis([0,3])
     set(gca,'position',pos{p})
-    set(gca,'Visible','off')
     p=p+1;
 end
 c=colorbar('southoutside');
