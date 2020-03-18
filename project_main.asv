@@ -1,7 +1,7 @@
 clear all, close all
 %% Setup
 %Choose if doing plain PCA or rPCA and with uv or with vmag
-plain=0; %1 for plain PCA 0 for rPCA
+plain=1; %1 for plain PCA 0 for rPCA
 uv=1; %1 for uv and 0 for vmag
 workingfolder= 'C:\Users\abber\Documents\School\Grad School\Winter 20\AMATH 582\Project';
 chord=4.06*10; %chord length in mm
@@ -93,14 +93,14 @@ caxis([-1.5 2])
 colorbar
 
 fvar=figure;
-set(gcf,'position',1.0e+03 *[0.3433    0.1936    1.0971    0.5264])
+set(gcf,'position',[635.8571  118.7143  804.5429  601.2857])
 %Calculate Variance and plot
 k=1;
-for iRot=1:3:nRot
+for iRot=1:4:nRot
     var=mean((up1_1FULL.(rotFields{iRot}).L...
         -mean(up1_1FULL.(rotFields{iRot}).L,2)).^2,2);
     [var_u,var_v] = unstackPCA(var,nxFull,nyFull,mask_log(:,:,iRot),1);
-    subplot(2,6,k)
+    subplot(2,4,k)
     pcolor(up1_1FULL.(rotFields{iRot}).x/chord,up1_1FULL.(rotFields{iRot}).y/chord...
         ,(var_u/max(var_u,[],'all'))')
     shading flat
@@ -111,7 +111,7 @@ for iRot=1:3:nRot
         ,'edgecolor','none')
     title(strcat('\langle u''^2 \rangle, \theta = '...
         , rotFields{iRot}(strfind(rotFields{iRot},'_')+1:end),char(176)))
-    subplot(2,6,k+6)
+    subplot(2,4,k+4)
     pcolor(up1_1FULL.(rotFields{iRot}).x/chord,up1_1FULL.(rotFields{iRot}).y/chord...
         ,(var_v/max(var_v,[],'all'))')
     shading flat
@@ -124,6 +124,9 @@ for iRot=1:3:nRot
         , rotFields{iRot}(strfind(rotFields{iRot},'_')+1:end),char(176)))
     k=k+1;
 end
+c=colorbar;
+set(c,'position',[0.922594666892399,0.109553231939162,0.024493401289418,0.814638783269948])
+print(gcf,'rPCA variance','-dpng','-r600')
 
 % Crops data for PCA
 DataCrop_rPCA(fullfile(workingfolder,'up1_1FULL rPCA'),t,0)
@@ -205,8 +208,14 @@ for n=1:ceil(nRot/8):nRot
     shading interp
     caxis([0,3])
     set(gca,'position',pos{p})
+    set(gca,'Visible','off')
     p=p+1;
 end
+c=colorbar;
+set(c,'position',[0.7585    0.0513    0.0180    0.4074])
+set(get(c,'title'),'string','$(\frac{V_{mag}}{U_\infty})$','interpreter','latex');
+axes(ha(end))
+set(gca,'Visible','off')
 print(gcf,strcat('velFields',run),'-dpng','-r600')
 end
 %% mean-subtract and fill in NaNs for SVD

@@ -1,7 +1,7 @@
 clear all, close all
 %% Setup
 %Choose if doing plain PCA or rPCA and with uv or with vmag
-plain=0; %1 for plain PCA 0 for rPCA
+plain=1; %1 for plain PCA 0 for rPCA
 uv=1; %1 for uv and 0 for vmag
 workingfolder= 'C:\Users\abber\Documents\School\Grad School\Winter 20\AMATH 582\Project';
 chord=4.06*10; %chord length in mm
@@ -208,8 +208,15 @@ for n=1:ceil(nRot/8):nRot
     shading interp
     caxis([0,3])
     set(gca,'position',pos{p})
+    set(gca,'Visible','off')
     p=p+1;
 end
+c=colorbar;
+c.FontSize=12;
+set(c,'position',[0.7585    0.0513    0.0180    0.4074])
+set(get(c,'title'),'string','$(\frac{V_{mag}}{U_\infty})$','interpreter','latex');
+axes(ha(end))
+set(gca,'Visible','off')
 print(gcf,strcat('velFields',run),'-dpng','-r600')
 end
 %% mean-subtract and fill in NaNs for SVD
