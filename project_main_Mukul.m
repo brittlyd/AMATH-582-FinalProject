@@ -42,7 +42,8 @@ for n=2:4:nRot
     tmpVort=data(n).Interp.Vort_crop;
     pcolor(data(n).Interp.Xcrop,data(n).Interp.Ycrop,tmpVmag)
     hold on
-    quiver(data(n).Interp.Xcrop,data(n).Interp.Ycrop,tmpU,tmpV,2,'k')
+    quiver(data(n).Interp.Xcrop(1:2:end),data(n).Interp.Ycrop(1:2:end)...
+        ,tmpU(1:2:end,1:2:end),tmpV(1:2:end,1:2:end),2,'k')
     plot(data(n).Interp.foil,'facecolor',[0 0 0],'facealpha',0.5...
         ,'edgecolor','none')
     ax.XAxis.Visible='off';

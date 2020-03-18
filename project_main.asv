@@ -197,7 +197,7 @@ for n=1:ceil(nRot/8):nRot
     tmpVmag=data.(rotFields{n}).interp.vmag_crop;
     pcolor(data.(rotFields{n}).interp.xcrop,data.(rotFields{n}).interp.ycrop,tmpVmag)
     hold on
-    quiver(data.(rotFields{n}).interp.xcrop,data.(rotFields{n}).interp.ycrop,tmpU,tmpV,2,'k')
+    quiver(data.(rotFields{n}).interp.xcrop(1:2:end).,data.(rotFields{n}).interp.ycrop,tmpU,tmpV,2,'k')
     plot(data.(rotFields{n}).interp.foil,'facecolor',[0 0 0],'facealpha',0.5...
         ,'edgecolor','none')
     ax.XAxis.Visible='off';
@@ -212,6 +212,7 @@ for n=1:ceil(nRot/8):nRot
     p=p+1;
 end
 c=colorbar;
+c.FontSize=12;
 set(c,'position',[0.7585    0.0513    0.0180    0.4074])
 set(get(c,'title'),'string','$(\frac{V_{mag}}{U_\infty})$','interpreter','latex');
 axes(ha(end))
