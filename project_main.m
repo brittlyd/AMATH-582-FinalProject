@@ -32,7 +32,7 @@ t=2; %truncation
 run='AbbyRPCA'; %what to append to all plot saving so things don't get overwritten between data sets
 
 % load data, initialize
-workingfolder = '';
+workingfolder= 'C:\Users\abber\Documents\School\Grad School\Winter 20\AMATH 582\Project';
 load(fullfile(workingfolder,'up1_1FULL.mat'))
 rotFields = fieldnames(up1_1FULL);
 nRot = length(rotFields);
@@ -54,7 +54,7 @@ for iRot = 1:nRot
     v = up1_1FULL.(rotFields{iRot}).v;
     vmag = up1_1FULL.(rotFields{iRot}).vmag;
     mask_ind = up1_1FULL.(rotFields{iRot}).mask_inds;
-    lambda = 5; % choose your sparsity constant value (1 is often a good starting point)
+    lambda = 2; % choose your sparsity constant value (1 is often a good starting point)
     tol = 1e-7; % set your tolerance
     maxIter = 1000; % set your maximum number of iterations
     if iRot>(7+t)
@@ -133,7 +133,7 @@ axis tight
 hold on
 plot(up1_1FULL.(rotFields{13}).foil,'facecolor',[0 0 0],'facealpha',0.5...
     ,'edgecolor','none')
-title('\langle v_{mag}''^2 \rangle')
+title('\langle v''_{mag}^2 \rangle')
 
 var=mean((up1_1FULL.(rotFields{13}).L_vmag...
     -mean(up1_1FULL.(rotFields{13}).L_vmag,2)).^2,2);
@@ -147,7 +147,7 @@ axis tight
 hold on
 plot(up1_1FULL.(rotFields{13}).foil,'facecolor',[0 0 0],'facealpha',0.5...
     ,'edgecolor','none')
-title('\langle v_{mag}''^2 \rangle after rPCA')
+title('\langle v''_{mag}^2 \rangle after rPCA')
 c=colorbar;
 set(c,'position',[0.9226    0.2804    0.0263    0.4742])
 sgtitle(strcat('\theta = '...
@@ -280,9 +280,10 @@ set(f,'position',[331.8571   13.5714  822.8571  706.4286])
 f2=figure;
 set(f2,'position',[331.8571   13.5714  822.8571  706.4286])
 [ha2, pos2]= tight_subplot(3,2,[.05 .15],[.1 .01],[.1 .1]);
-for k = 1:6
+j=1;
+for k = [1:5,ind]
     f
-    axes(ha(k))
+    axes(ha(j))
     %Put NaNs back in
     if uv
         mode=Ureplaced(1:end/2,k);
@@ -307,11 +308,11 @@ for k = 1:6
     axis equal
     axis tight
     colorbar
-    set(gca,'position',pos{k})
+    set(gca,'position',pos{j})
     
     if uv
         f2
-        axes(ha2(k))
+        axes(ha2(j))
         pcolor(xcrop,ycrop,reshape(mode2, [nx ny]))
         hold on
         plot(data.deg_48.interp.foil,'facecolor',[0 0 0],'facealpha',0.5...
@@ -323,8 +324,9 @@ for k = 1:6
         axis equal
         axis tight
         colorbar
-        set(gca,'position',pos2{k})
+        set(gca,'position',pos2{j})
     end
+    j=j+1;
 end
 print(f,strcat(titletext,run),'-dpng','-r600')
 if uv
