@@ -33,7 +33,7 @@ Xcrop=data(1).Interp.Xcrop;
 Ycrop=data(1).Interp.Ycrop;
 [ha, pos]= tight_subplot(2,4,[0 0],[.01 .01],[.01 .01]);
 p=1;
-for n=2:4:nRot
+for n=[9,13,16,18,20,24,28,30]
     axes(ha(p))
     ax=gca;
     set(gca,'Visible','off')
