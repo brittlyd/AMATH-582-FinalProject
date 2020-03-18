@@ -7,6 +7,7 @@ workingfolder= 'C:\Users\abber\Documents\School\Grad School\Winter 20\AMATH 582\
 chord=4.06*10; %chord length in mm
 
 if plain
+workingfolder= 'C:\Users\abber\Documents\School\Grad School\Winter 20\AMATH 582\Project';
 t=0; %truncation
 run='Abby'; %what to append to all plot saving so things don't get overwritten between data sets
 %load data
@@ -31,6 +32,7 @@ t=2; %truncation
 run='AbbyRPCA'; %what to append to all plot saving so things don't get overwritten between data sets
 
 % load data, initialize
+workingfolder = '';
 load(fullfile(workingfolder,'up1_1FULL.mat'))
 rotFields = fieldnames(up1_1FULL);
 nRot = length(rotFields);
@@ -91,20 +93,20 @@ end
 % save post rPCA structure
 save(fullfile(workingfolder,'up1_1FULL rPCA'),'up1_1FULL')
 
-figure
-subplot(2,2,1)
-pcolor(up1_1FULL.deg_30.u_avg)
-title('u avg')
-shading flat
-caxis([-1.5 2])
-colorbar
-
-subplot(2,2,3)
-pcolor(up1_1FULL.deg_30.v_avg)
-title('v avg')
-shading flat
-caxis([-1.5 2])
-colorbar
+% figure
+% subplot(2,2,1)
+% pcolor(up1_1FULL.deg_30.u_avg)
+% title('u avg')
+% shading flat
+% caxis([-1.5 2])
+% colorbar
+% 
+% subplot(2,2,3)
+% pcolor(up1_1FULL.deg_30.v_avg)
+% title('v avg')
+% shading flat
+% caxis([-1.5 2])
+% colorbar
 
 if ~uv
 fvar=figure;
