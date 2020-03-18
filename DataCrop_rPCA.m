@@ -1,4 +1,4 @@
-function DataCrop_rPCA(DataSet,truncateStart,truncateEnd)
+function DataCrop_rPCA(DataSet,truncateStart,truncateEnd,uv)
 load(DataSet);
 data=up1_1FULL;
 chord=4.06*10; %mm
@@ -61,16 +61,22 @@ for i=a+1:length(names)-b
     [in,out]=inpolygon(Xrot/chord,Yrot/chord,cropbound.Vertices(:,1)...
         ,cropbound.Vertices(:,2));
     ind=logical(in+out);
+    if uv
     U_trans=data.(names{i}).uL';
     V_trans=data.(names{i}).vL';
-%     Vmag_trans=data.(names{i}).vmag_avg';
+    else
+    Vmag_trans=data.(names{i}).vmagL';
+    end
     
     %Move all croped data so the bottom left corner of the bounding box is at (0,0) 
     Xcrop=Xrot(ind)-min(xbound)*chord;
     Ycrop=Yrot(ind)-min(ybound)*chord;
+    if uv
     U_crop=U_trans(ind);
     V_crop=V_trans(ind);
-%     Vmag_crop=Vmag_trans(ind);
+    else
+    Vmag_crop=Vmag_trans(ind);
+    end
 
     %Shift the foil vertices as well
     foilrot.Vertices(:,1)=foilrot.Vertices(:,1)-min(xbound);
@@ -84,12 +90,15 @@ for i=a+1:length(names)-b
     [xgrid{i},ygrid{i}]=meshgrid(xinterp,yinterp);
     data.(names{i}).interp.xcrop=xgrid{i}(1,:);
     data.(names{i}).interp.ycrop=ygrid{i}(:,1);
+    if uv
     data.(names{i}).interp.u_crop=griddata(Xcrop/chord,Ycrop/chord...
         ,U_crop,xgrid{i},ygrid{i});
     data.(names{i}).interp.v_crop=griddata(Xcrop/chord,Ycrop/chord...
         ,V_crop,xgrid{i},ygrid{i});
-%     data.(names{i}).interp.vmag_crop=griddata(Xcrop/chord,Ycrop/chord...
-%         ,Vmag_crop,xgrid{i},ygrid{i});
+    else
+    data.(names{i}).interp.vmag_crop=griddata(Xcrop/chord,Ycrop/chord...
+        ,Vmag_crop,xgrid{i},ygrid{i});
+    end
     data.(names{i}).interp.foil=foilrot;
 end
 save(strcat(DataSet,' Crop'),'data')

@@ -1,8 +1,8 @@
 clear all, close all
 %% Setup
 %Choose if doing plain PCA or rPCA and with uv or with vmag
-plain=1; %1 for plain PCA 0 for rPCA
-uv=1; %1 for uv and 0 for vmag
+plain=0; %1 for plain PCA 0 for rPCA
+uv=0; %1 for uv and 0 for vmag
 workingfolder= 'C:\Users\abber\Documents\School\Grad School\Winter 20\AMATH 582\Project';
 chord=4.06*10; %chord length in mm
 
@@ -50,6 +50,7 @@ nyFull = up1_1FULL.deg_30.ny;
 for iRot = 1:nRot
     u = up1_1FULL.(rotFields{iRot}).u;
     v = up1_1FULL.(rotFields{iRot}).v;
+    vmag = up1_1FULL.(rotFields{iRot}).vmag;
     mask_ind = up1_1FULL.(rotFields{iRot}).mask_inds;
     lambda = 5; % choose your sparsity constant value (1 is often a good starting point)
     tol = 1e-7; % set your tolerance
@@ -59,16 +60,29 @@ for iRot = 1:nRot
     else
         fl=0;
     end
-    [up1_1FULL.(rotFields{iRot}).L, up1_1FULL.(rotFields{iRot}).N,mask_log(:,:,iRot)] ... 
-        = rPCA_main(u,v,nxFull,nyFull, mask_ind, lambda, tol, maxIter,fl);
+ 
     % average all columns of L,N to get "rPCA cleaned" phase average
-    up1_1FULL.(rotFields{iRot}).Lr = mean(up1_1FULL.(rotFields{iRot}).L,2);
-    up1_1FULL.(rotFields{iRot}).Nr = mean(up1_1FULL.(rotFields{iRot}).N,2);
-    % put mask back in
-    [up1_1FULL.(rotFields{iRot}).uL,up1_1FULL.(rotFields{iRot}).vL] = ...
-        unstackPCA(up1_1FULL.(rotFields{iRot}).Lr,nxFull,nyFull,mask_log(:,:,iRot),1);
-    [up1_1FULL.(rotFields{iRot}).uN,up1_1FULL.(rotFields{iRot}).vN] = ...
-        unstackPCA(up1_1FULL.(rotFields{iRot}).Nr,nxFull,nyFull,mask_log(:,:,iRot),1);
+    if uv
+        [up1_1FULL.(rotFields{iRot}).L, up1_1FULL.(rotFields{iRot}).N,mask_log(:,:,iRot)] ...
+            = rPCA_main(u,v,nxFull,nyFull, mask_ind, lambda, tol, maxIter,fl);
+        up1_1FULL.(rotFields{iRot}).Lr = mean(up1_1FULL.(rotFields{iRot}).L,2);
+        up1_1FULL.(rotFields{iRot}).Nr = mean(up1_1FULL.(rotFields{iRot}).N,2);
+        % put mask back in
+        [up1_1FULL.(rotFields{iRot}).uL,up1_1FULL.(rotFields{iRot}).vL] = ...
+            unstackPCA(up1_1FULL.(rotFields{iRot}).Lr,nxFull,nyFull,mask_log(:,:,iRot),1);
+        [up1_1FULL.(rotFields{iRot}).uN,up1_1FULL.(rotFields{iRot}).vN] = ...
+            unstackPCA(up1_1FULL.(rotFields{iRot}).Nr,nxFull,nyFull,mask_log(:,:,iRot),1);
+    else
+        [up1_1FULL.(rotFields{iRot}).L_vmag, up1_1FULL.(rotFields{iRot}).N_vmag,mask_log(:,:,iRot)] ...
+            = rPCA_main(vmag,[],nxFull,nyFull, mask_ind, lambda, tol, maxIter,fl);
+        up1_1FULL.(rotFields{iRot}).Lr_vmag = mean(up1_1FULL.(rotFields{iRot}).L_vmag,2);
+        up1_1FULL.(rotFields{iRot}).Nr_vmag = mean(up1_1FULL.(rotFields{iRot}).N_vmag,2);
+        % put mask back in
+        [up1_1FULL.(rotFields{iRot}).vmagL] = ...
+            unstackPCA(up1_1FULL.(rotFields{iRot}).Lr_vmag,nxFull,nyFull,mask_log(:,:,iRot),0);
+        [up1_1FULL.(rotFields{iRot}).vmagN] = ...
+            unstackPCA(up1_1FULL.(rotFields{iRot}).Nr_vmag,nxFull,nyFull,mask_log(:,:,iRot),0);
+    end
 end
 % checks for rPCA
 % lambdaCheck(up1_1FULL.deg_30.uL, up1_1FULL.deg_30.vL,up1_1FULL.deg_30.uN...
@@ -92,44 +106,55 @@ shading flat
 caxis([-1.5 2])
 colorbar
 
+if ~uv
 fvar=figure;
-set(gcf,'position',[635.8571  118.7143  804.5429  601.2857])
+set(gcf,'position',[633.5714  313.5714  806.8286  406.4286])
 %Calculate Variance and plot
-k=1;
-for iRot=1:4:nRot
-    var=mean((up1_1FULL.(rotFields{iRot}).L...
-        -mean(up1_1FULL.(rotFields{iRot}).L,2)).^2,2);
-    [var_u,var_v] = unstackPCA(var,nxFull,nyFull,mask_log(:,:,iRot),1);
-    subplot(2,4,k)
-    pcolor(up1_1FULL.(rotFields{iRot}).x/chord,up1_1FULL.(rotFields{iRot}).y/chord...
-        ,(var_u/max(var_u,[],'all'))')
-    shading flat
-    axis equal
-    axis tight
-    hold on
-    plot(up1_1FULL.(rotFields{iRot}).foil,'facecolor',[0 0 0],'facealpha',0.5...
-        ,'edgecolor','none')
-    title(strcat('\langle u''^2 \rangle, \theta = '...
-        , rotFields{iRot}(strfind(rotFields{iRot},'_')+1:end),char(176)))
-    subplot(2,4,k+4)
-    pcolor(up1_1FULL.(rotFields{iRot}).x/chord,up1_1FULL.(rotFields{iRot}).y/chord...
-        ,(var_v/max(var_v,[],'all'))')
-    shading flat
-    axis equal 
-    axis tight
-    hold on
-    plot(up1_1FULL.(rotFields{iRot}).foil,'facecolor',[0 0 0],'facealpha',0.5...
-        ,'edgecolor','none')
-    title(strcat('\langle v''^2 \rangle, \theta = '...
-        , rotFields{iRot}(strfind(rotFields{iRot},'_')+1:end),char(176)))
-    k=k+1;
-end
+subplot(1,3,1)
+pcolor(up1_1FULL.(rotFields{13}).x/chord,up1_1FULL.(rotFields{13}).y/chord...
+    ,up1_1FULL.(rotFields{13}).vmag(:,:,1)')
+shading flat
+axis equal
+axis tight
+hold on
+plot(up1_1FULL.(rotFields{13}).foil,'facecolor',[0 0 0],'facealpha',0.5...
+    ,'edgecolor','none')
+title('Single Frame')
+subplot(1,3,2)
+var_plain=nanmean((up1_1FULL.(rotFields{13}).vmag...
+    -nanmean(up1_1FULL.(rotFields{13}).vmag,3)).^2,3);
+pcolor(up1_1FULL.(rotFields{13}).x/chord,up1_1FULL.(rotFields{13}).y/chord...
+    ,(var_plain/max(var_plain,[],'all'))')
+shading flat
+axis equal
+axis tight
+hold on
+plot(up1_1FULL.(rotFields{13}).foil,'facecolor',[0 0 0],'facealpha',0.5...
+    ,'edgecolor','none')
+title('\langle v_{mag}''^2 \rangle')
+
+var=mean((up1_1FULL.(rotFields{13}).L_vmag...
+    -mean(up1_1FULL.(rotFields{13}).L_vmag,2)).^2,2);
+[var_vmag] = unstackPCA(var,nxFull,nyFull,mask_log(:,:,13),0);
+subplot(1,3,3)
+pcolor(up1_1FULL.(rotFields{13}).x/chord,up1_1FULL.(rotFields{13}).y/chord...
+    ,(var_vmag/max(var_vmag,[],'all'))')
+shading flat
+axis equal
+axis tight
+hold on
+plot(up1_1FULL.(rotFields{13}).foil,'facecolor',[0 0 0],'facealpha',0.5...
+    ,'edgecolor','none')
+title('\langle v_{mag}''^2 \rangle after rPCA')
 c=colorbar;
-set(c,'position',[0.922594666892399,0.109553231939162,0.024493401289418,0.814638783269948])
+set(c,'position',[0.9226    0.2804    0.0263    0.4742])
+sgtitle(strcat('\theta = '...
+    , rotFields{13}(strfind(rotFields{13},'_')+1:end),char(176)))
 print(gcf,'rPCA variance','-dpng','-r600')
+end
 
 % Crops data for PCA
-DataCrop_rPCA(fullfile(workingfolder,'up1_1FULL rPCA'),t,0)
+DataCrop_rPCA(fullfile(workingfolder,'up1_1FULL rPCA'),t,0,uv)
 load(fullfile(workingfolder,'up1_1FULL rPCA Crop.mat'))
 rotFields = fieldnames(data);
 nRot = length(rotFields);
@@ -144,39 +169,6 @@ for iRot = 1:nRot
     if uv
         u = reshape(data.(rotFields{iRot}).interp.u_crop, [nx*ny 1]);
         v = reshape(data.(rotFields{iRot}).interp.v_crop, [nx*ny 1]);
-%         figure(3); clf(3)
-%         subplot(1,4,4)
-%     pcolor(data.(rotFields{iRot}).interp.xcrop...
-%         ,data.(rotFields{iRot}).interp.ycrop,data.(rotFields{iRot}).interp.u_crop)
-%     hold on
-%     plot(data.(rotFields{iRot}).interp.foil)
-%     shading flat
-%     axis equal
-%     axis tight
-%     subplot(1,4,3)
-%     pcolor(data.(rotFields{iRot}).x/chord...
-%         ,data.(rotFields{iRot}).y/chord,data.(rotFields{iRot}).uL')
-%     hold on
-%     plot(data.(rotFields{iRot}).foil)
-%     shading flat
-%     axis equal
-%     axis tight
-%     subplot(1,4,2)
-%     pcolor(data.(rotFields{iRot}).x/chord...
-%         ,data.(rotFields{iRot}).y/chord,data.(rotFields{iRot}).u_avg')
-%     hold on
-%     plot(data.(rotFields{iRot}).foil)
-%     shading flat
-%     axis equal
-%     axis tight
-%     subplot(1,4,1)
-%     pcolor(fliplr(mask_log(:,:,iRot+t)'))
-%     hold on
-%     plot(data.(rotFields{iRot}).foil)
-%     shading flat
-%     axis equal
-%     axis tight
-%     pause(0.5)
         Y(:,iRot) = [u;v];
     else
         Y(:,iRot) = reshape(data.(rotFields{iRot}).interp.vmag_crop, [nx*ny 1]);
@@ -184,43 +176,43 @@ for iRot = 1:nRot
 end
 
 %% Vel field plotting
-if plain
-figure
-set(gcf,'position',1.0e+03 *[0.0016    0.2079    1.4600    0.5120])
-[ha, pos]= tight_subplot(2,4,[0 0],[.01 .01],[.01 .01]);
-p=1;
-for n=1:ceil(nRot/8):nRot
-    axes(ha(p))
-    ax=gca;
-    set(gca,'Visible','off')
-    tmpU=data.(rotFields{n}).interp.u_crop;
-    tmpV=data.(rotFields{n}).interp.v_crop;
-    tmpVmag=data.(rotFields{n}).interp.vmag_crop;
-    pcolor(data.(rotFields{n}).interp.xcrop,data.(rotFields{n}).interp.ycrop,tmpVmag)
-    hold on
-    quiver(data.(rotFields{n}).interp.xcrop(1:2:end)...
-        ,data.(rotFields{n}).interp.ycrop(1:2:end),tmpU(1:2:end,1:2:end)...
-        ,tmpV(1:2:end,1:2:end),2,'k')
-    plot(data.(rotFields{n}).interp.foil,'facecolor',[0 0 0],'facealpha',0.5...
-        ,'edgecolor','none')
-    ax.XAxis.Visible='off';
-    ax.YAxis.Visible='off';
-    title(strcat('\theta= ',(rotFields{n}(strfind(rotFields{n},'_')+1:end))))
-    axis equal
-    axis tight
-    shading interp
-    caxis([0,3])
-    set(gca,'position',pos{p})
-    p=p+1;
-end
-c=colorbar;
-c.FontSize=12;
-set(c,'position',[0.7585    0.0513    0.0180    0.4074])
-set(get(c,'title'),'string','$(\frac{V_{mag}}{U_\infty})$','interpreter','latex');
-axes(ha(end))
-set(gca,'Visible','off')
-print(gcf,strcat('velFields',run),'-dpng','-r600')
-end
+% if plain
+% figure
+% set(gcf,'position',1.0e+03 *[0.0016    0.2079    1.4600    0.5120])
+% [ha, pos]= tight_subplot(2,4,[0 0],[.01 .01],[.01 .01]);
+% p=1;
+% for n=1:ceil(nRot/8):nRot
+%     axes(ha(p))
+%     ax=gca;
+%     set(gca,'Visible','off')
+%     tmpU=data.(rotFields{n}).interp.u_crop;
+%     tmpV=data.(rotFields{n}).interp.v_crop;
+%     tmpVmag=data.(rotFields{n}).interp.vmag_crop;
+%     pcolor(data.(rotFields{n}).interp.xcrop,data.(rotFields{n}).interp.ycrop,tmpVmag)
+%     hold on
+%     quiver(data.(rotFields{n}).interp.xcrop(1:2:end)...
+%         ,data.(rotFields{n}).interp.ycrop(1:2:end),tmpU(1:2:end,1:2:end)...
+%         ,tmpV(1:2:end,1:2:end),2,'k')
+%     plot(data.(rotFields{n}).interp.foil,'facecolor',[0 0 0],'facealpha',0.5...
+%         ,'edgecolor','none')
+%     ax.XAxis.Visible='off';
+%     ax.YAxis.Visible='off';
+%     title(strcat('\theta= ',(rotFields{n}(strfind(rotFields{n},'_')+1:end))))
+%     axis equal
+%     axis tight
+%     shading interp
+%     caxis([0,3])
+%     set(gca,'position',pos{p})
+%     p=p+1;
+% end
+% c=colorbar;
+% c.FontSize=12;
+% set(c,'position',[0.7585    0.0513    0.0180    0.4074])
+% set(get(c,'title'),'string','$(\frac{V_{mag}}{U_\infty})$','interpreter','latex');
+% axes(ha(end))
+% set(gca,'Visible','off')
+% print(gcf,strcat('velFields',run),'-dpng','-r600')
+% end
 %% mean-subtract and fill in NaNs for SVD
 Yavg = mean(Y,2,'omitnan'); %compute row mean for subtraction
 Yms =Y-Yavg*ones(1,size(Y,2)); % Y mean-subtracted
@@ -243,13 +235,13 @@ energy=sig/sum(sig)*100;
 for n=1:length(sig)
     energytotal(n)=sum(energy(1:n));
 end
-figure
-pcolor(V)
-if uv
-    print(gcf,strcat('Vuv matrix',run),'-dpng','-r600')
-else
-    print(gcf,strcat('Vvmag matrix',run),'-dpng','-r600')
-end
+% figure
+% pcolor(V)
+% if uv
+%     print(gcf,strcat('Vuv matrix',run),'-dpng','-r600')
+% else
+%     print(gcf,strcat('Vvmag matrix',run),'-dpng','-r600')
+% end
 
 figure
 set(gcf,'position',[227.3000  403.9000  720.5571  316.1000])
@@ -336,33 +328,33 @@ print(f,strcat(titletext,run),'-dpng','-r600')
 if uv
    print(f2,strcat(titletext2,run),'-dpng','-r600')
 end
-%% Reconstruct Each Angle 
-if ~uv
-figure
-set(gcf,'position',1.0e+03 *[0.0016    0.2079    1.4600    0.5120])
-[ha, pos]= tight_subplot(2,4,[0 0],[.01 .01],[.01 .01]);
-p=1;
-indRecon=ceil(size(Ureplaced,2)/2); %Reconstructs with 50 perc. of the modes
-% indRecon=ind; %Recontructs with 90 perc. of the energy
-for n=1:ceil(nRot/8):nRot
-    axes(ha(p))
-    ax=gca;
-    %Reconstruct and add mean back
-    tmpVmag=Ureplaced(:,1:indRecon)*S(1:indRecon,1:indRecon)*V(n,1:indRecon)'+Yavg;
-    pcolor(data.(rotFields{n}).interp.xcrop,data.(rotFields{n}).interp.ycrop...
-        ,reshape(tmpVmag, [nx ny]))
-    hold on
-    plot(data.(rotFields{n}).interp.foil,'facecolor',[0 0 0],'facealpha',0.5...
-        ,'edgecolor','none')
-    ax.XAxis.Visible='off';
-    ax.YAxis.Visible='off';
-    title(strcat('\theta= ',rotFields{n}(strfind(rotFields{n},'_')+1:end)))
-    axis equal
-    axis tight
-    shading interp
-    caxis([0 3])
-    set(gca,'position',pos{p})
-    p=p+1;
-end
-print(gcf,strcat('velFieldsReconstruct',run),'-dpng','-r600')
-end
+% %% Reconstruct Each Angle 
+% if ~uv
+% figure
+% set(gcf,'position',1.0e+03 *[0.0016    0.2079    1.4600    0.5120])
+% [ha, pos]= tight_subplot(2,4,[0 0],[.01 .01],[.01 .01]);
+% p=1;
+% indRecon=ceil(size(Ureplaced,2)/2); %Reconstructs with 50 perc. of the modes
+% % indRecon=ind; %Recontructs with 90 perc. of the energy
+% for n=1:ceil(nRot/8):nRot
+%     axes(ha(p))
+%     ax=gca;
+%     %Reconstruct and add mean back
+%     tmpVmag=Ureplaced(:,1:indRecon)*S(1:indRecon,1:indRecon)*V(n,1:indRecon)'+Yavg;
+%     pcolor(data.(rotFields{n}).interp.xcrop,data.(rotFields{n}).interp.ycrop...
+%         ,reshape(tmpVmag, [nx ny]))
+%     hold on
+%     plot(data.(rotFields{n}).interp.foil,'facecolor',[0 0 0],'facealpha',0.5...
+%         ,'edgecolor','none')
+%     ax.XAxis.Visible='off';
+%     ax.YAxis.Visible='off';
+%     title(strcat('\theta= ',rotFields{n}(strfind(rotFields{n},'_')+1:end)))
+%     axis equal
+%     axis tight
+%     shading interp
+%     caxis([0 3])
+%     set(gca,'position',pos{p})
+%     p=p+1;
+% end
+% print(gcf,strcat('velFieldsReconstruct',run),'-dpng','-r600')
+% end

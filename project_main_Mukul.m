@@ -9,7 +9,7 @@ nRot = length(data);
 nRot = 32; %for just the upstream portion 
 nx = 52;
 ny = 52;
-uv = 1; %if 1 run for u and v, if 0 run for vmag
+uv = 0; %if 1 run for u and v, if 0 run for vmag
 if uv
 Y = zeros(nx*ny*2, nRot);
 else
