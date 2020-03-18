@@ -92,6 +92,42 @@ shading flat
 caxis([-1.5 2])
 colorbar
 
+fvar=figure;
+set(gcf,'position',[635.8571  118.7143  804.5429  601.2857])
+%Calculate Variance and plot
+k=1;
+for iRot=1:4:nRot
+    var=mean((up1_1FULL.(rotFields{iRot}).L...
+        -mean(up1_1FULL.(rotFields{iRot}).L,2)).^2,2);
+    [var_u,var_v] = unstackPCA(var,nxFull,nyFull,mask_log(:,:,iRot),1);
+    subplot(2,4,k)
+    pcolor(up1_1FULL.(rotFields{iRot}).x/chord,up1_1FULL.(rotFields{iRot}).y/chord...
+        ,(var_u/max(var_u,[],'all'))')
+    shading flat
+    axis equal
+    axis tight
+    hold on
+    plot(up1_1FULL.(rotFields{iRot}).foil,'facecolor',[0 0 0],'facealpha',0.5...
+        ,'edgecolor','none')
+    title(strcat('\langle u''^2 \rangle, \theta = '...
+        , rotFields{iRot}(strfind(rotFields{iRot},'_')+1:end),char(176)))
+    subplot(2,4,k+4)
+    pcolor(up1_1FULL.(rotFields{iRot}).x/chord,up1_1FULL.(rotFields{iRot}).y/chord...
+        ,(var_v/max(var_v,[],'all'))')
+    shading flat
+    axis equal 
+    axis tight
+    hold on
+    plot(up1_1FULL.(rotFields{iRot}).foil,'facecolor',[0 0 0],'facealpha',0.5...
+        ,'edgecolor','none')
+    title(strcat('\langle v''^2 \rangle, \theta = '...
+        , rotFields{iRot}(strfind(rotFields{iRot},'_')+1:end),char(176)))
+    k=k+1;
+end
+c=colorbar;
+set(c,'position',[0.922594666892399,0.109553231939162,0.024493401289418,0.814638783269948])
+print(gcf,'rPCA variance','-dpng','-r600')
+
 % Crops data for PCA
 DataCrop_rPCA(fullfile(workingfolder,'up1_1FULL rPCA'),t,0)
 load(fullfile(workingfolder,'up1_1FULL rPCA Crop.mat'))

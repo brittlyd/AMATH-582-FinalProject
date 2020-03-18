@@ -92,6 +92,39 @@ shading flat
 caxis([-1.5 2])
 colorbar
 
+fvar=figure;
+set(gcf,'position',1.0e+03 *[0.3433    0.1936    1.0971    0.5264])
+%Calculate Variance and plot
+k=1;
+for iRot=1:3:nRot
+    var=mean((up1_1FULL.(rotFields{iRot}).L...
+        -mean(up1_1FULL.(rotFields{iRot}).L,2)).^2,2);
+    [var_u,var_v] = unstackPCA(var,nxFull,nyFull,mask_log(:,:,iRot),1);
+    subplot(2,6,k)
+    pcolor(up1_1FULL.(rotFields{iRot}).x/chord,up1_1FULL.(rotFields{iRot}).y/chord...
+        ,(var_u/max(var_u,[],'all'))')
+    shading flat
+    axis equal
+    axis tight
+    hold on
+    plot(up1_1FULL.(rotFields{iRot}).foil,'facecolor',[0 0 0],'facealpha',0.5...
+        ,'edgecolor','none')
+    title(strcat('\langle u''^2 \rangle, \theta = '...
+        , rotFields{iRot}(strfind(rotFields{iRot},'_')+1:end),char(176)))
+    subplot(2,6,k+6)
+    pcolor(up1_1FULL.(rotFields{iRot}).x/chord,up1_1FULL.(rotFields{iRot}).y/chord...
+        ,(var_v/max(var_v,[],'all'))')
+    shading flat
+    axis equal 
+    axis tight
+    hold on
+    plot(up1_1FULL.(rotFields{iRot}).foil,'facecolor',[0 0 0],'facealpha',0.5...
+        ,'edgecolor','none')
+    title(strcat('\langle v''^2 \rangle, \theta = '...
+        , rotFields{iRot}(strfind(rotFields{iRot},'_')+1:end),char(176)))
+    k=k+1;
+end
+
 % Crops data for PCA
 DataCrop_rPCA(fullfile(workingfolder,'up1_1FULL rPCA'),t,0)
 load(fullfile(workingfolder,'up1_1FULL rPCA Crop.mat'))
@@ -102,45 +135,45 @@ ycrop=data.(rotFields{1}).interp.ycrop;
 end
 %% Form Y matrix
 
-for iRot = 1:8
+for iRot = 1:nRot
     %Y(:,iRot) = reshape(data.(rotFields{iRot}).Interp.Vort_crop, [nx*ny 1]);
     %Y(:,iRot) = reshape(data.(rotFields{iRot}).InterpCommon.Vmag_crop, [nx*ny 1]);
     if uv
         u = reshape(data.(rotFields{iRot}).interp.u_crop, [nx*ny 1]);
         v = reshape(data.(rotFields{iRot}).interp.v_crop, [nx*ny 1]);
-        figure(3); clf(3)
-        subplot(1,4,4)
-    pcolor(data.(rotFields{iRot}).interp.xcrop...
-        ,data.(rotFields{iRot}).interp.ycrop,data.(rotFields{iRot}).interp.u_crop)
-    hold on
-    plot(data.(rotFields{iRot}).interp.foil)
-    shading flat
-    axis equal
-    axis tight
-    subplot(1,4,3)
-    pcolor(data.(rotFields{iRot}).x/chord...
-        ,data.(rotFields{iRot}).y/chord,data.(rotFields{iRot}).uL')
-    hold on
-    plot(data.(rotFields{iRot}).foil)
-    shading flat
-    axis equal
-    axis tight
-    subplot(1,4,2)
-    pcolor(data.(rotFields{iRot}).x/chord...
-        ,data.(rotFields{iRot}).y/chord,data.(rotFields{iRot}).u_avg')
-    hold on
-    plot(data.(rotFields{iRot}).foil)
-    shading flat
-    axis equal
-    axis tight
-    subplot(1,4,1)
-    pcolor(fliplr(mask_log(:,:,iRot+t)'))
-    hold on
-    plot(data.(rotFields{iRot}).foil)
-    shading flat
-    axis equal
-    axis tight
-    pause(0.5)
+%         figure(3); clf(3)
+%         subplot(1,4,4)
+%     pcolor(data.(rotFields{iRot}).interp.xcrop...
+%         ,data.(rotFields{iRot}).interp.ycrop,data.(rotFields{iRot}).interp.u_crop)
+%     hold on
+%     plot(data.(rotFields{iRot}).interp.foil)
+%     shading flat
+%     axis equal
+%     axis tight
+%     subplot(1,4,3)
+%     pcolor(data.(rotFields{iRot}).x/chord...
+%         ,data.(rotFields{iRot}).y/chord,data.(rotFields{iRot}).uL')
+%     hold on
+%     plot(data.(rotFields{iRot}).foil)
+%     shading flat
+%     axis equal
+%     axis tight
+%     subplot(1,4,2)
+%     pcolor(data.(rotFields{iRot}).x/chord...
+%         ,data.(rotFields{iRot}).y/chord,data.(rotFields{iRot}).u_avg')
+%     hold on
+%     plot(data.(rotFields{iRot}).foil)
+%     shading flat
+%     axis equal
+%     axis tight
+%     subplot(1,4,1)
+%     pcolor(fliplr(mask_log(:,:,iRot+t)'))
+%     hold on
+%     plot(data.(rotFields{iRot}).foil)
+%     shading flat
+%     axis equal
+%     axis tight
+%     pause(0.5)
         Y(:,iRot) = [u;v];
     else
         Y(:,iRot) = reshape(data.(rotFields{iRot}).interp.vmag_crop, [nx*ny 1]);
