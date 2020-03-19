@@ -3,7 +3,7 @@ clear all, close all
 %Choose if doing plain PCA or rPCA and with uv or with vmag
 plain=1; %1 for plain PCA 0 for rPCA
 uv=0; %1 for uv and 0 for vmag
-workingfolder= '';
+workingfolder= 'C:\Users\abber\Documents\School\Grad School\Winter 20\AMATH 582\Project';
 chord=4.06*10; %chord length in mm
 
 if plain
@@ -145,6 +145,7 @@ if ~plain
     nRot = length(rotFields);
     xcrop=data.(rotFields{1}).interp.xcrop;
     ycrop=data.(rotFields{1}).interp.ycrop;
+
 end
 %% Form Y matrix
 
@@ -157,7 +158,6 @@ for iRot = 1:nRot
         Y(:,iRot) = reshape(data.(rotFields{iRot}).interp.vmag_crop, [nx*ny 1]);
     end
 end
-
 %% Vel field plotting -rPCA
 if ~plain
     figure('DefaultAxesFontsize', 16)
@@ -232,6 +232,7 @@ axes(ha(end))
 set(gca,'Visible','off')
 print(gcf,strcat('velFields',run),'-dpng','-r600')
 end
+
 %% mean-subtract and fill in NaNs for SVD
 Yavg = mean(Y,2,'omitnan'); %compute row mean for subtraction
 Yms =Y-Yavg*ones(1,size(Y,2)); % Y mean-subtracted
@@ -253,12 +254,12 @@ end
 
 %% Plot singular values & cumulative energy
 figure
-set(gcf,'position',[227.3000  403.9000  720.5571  316.1000])
+set(gcf,'position',[251.2857  403.9000  485.1429  316.1000])
 left_color = [0.9153    0.2816    0.2878];
 right_color = [0 .5 .5];
 set(gcf,'defaultAxesColorOrder',[left_color; right_color]);
 yyaxis left
-
+set(gca,'fontsize',14)
 a=plot(energy,'o','markerfacecolor',left_color);
 hold on
 
@@ -266,12 +267,13 @@ ind=find(energytotal>=90,1);
 plot(ind,energy(ind),'o','markerfacecolor',[0 0 0],'markersize',12)
 ylabel('% of energy')
 axis tight
+ylim([0 35])
 yyaxis right
+set(gca,'fontsize',14)
 plot(energytotal,'o','markerfacecolor',right_color)
 hold on
-
-plot(linspace(1,length(sig),100),90*ones(1,100),'--k','linewidth',1.75)
-ylabel('% of Energy Captured')
+plot(linspace(1,length(sig),100),90*ones(1,100),'--','color',right_color,'linewidth',1.75)
+ylabel('Cumulative Energy %')
 xlabel('mode')
 axis tight
 grid on
@@ -284,10 +286,10 @@ Ureplaced(nanRow>th,:)=NaN;
 Ureplaced(~(nanRow>th),:)=U;
 
 f=figure;
-set(f,'position',[331.8571   13.5714  822.8571  706.4286])
+set(f,'position',[ 331.8571   13.5714  760.0000  706.4286])
 [ha, pos]= tight_subplot(3,2,[.05 .15],[.1 .01],[.1 .1]);
 f2=figure;
-set(f2,'position',[331.8571   13.5714  822.8571  706.4286])
+set(f2,'position',[ 331.8571   13.5714  760.0000  706.4286])
 [ha2, pos2]= tight_subplot(3,2,[.05 .15],[.1 .01],[.1 .1]);
 j=1;
 for k = [1:5,ind]
@@ -296,14 +298,14 @@ for k = [1:5,ind]
     %Put NaNs back in
     if uv
         mode=Ureplaced(1:end/2,k);
-        mode=mode/max(mode,[],'all');
+        mode=mode/max(abs(mode),[],'all');
         mode2=Ureplaced(end/2+1:end,k);
-        mode2=mode2/max(mode2,[],'all');
+        mode2=mode2/max(abs(mode2),[],'all');
         titletext='u modes';
         titletext2='v modes';
     else
         mode=Ureplaced(:,k);
-        mode=mode/max(mode,[],'all');
+        mode=mode/max(abs(mode),[],'all');
         titletext='vmag modes';
     end
     pcolor(xcrop,ycrop,reshape(mode, [nx ny]))
@@ -317,6 +319,8 @@ for k = [1:5,ind]
     axis equal
     axis tight
     colorbar
+    caxis([-1 1])
+    set(gca,'fontsize',12)
     set(gca,'position',pos{j})
     
     if uv
@@ -333,6 +337,8 @@ for k = [1:5,ind]
         axis equal
         axis tight
         colorbar
+        caxis([-1 1])
+        set(gca,'fontsize',12)
         set(gca,'position',pos2{j})
     end
     j=j+1;

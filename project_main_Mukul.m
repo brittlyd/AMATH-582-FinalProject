@@ -91,22 +91,25 @@ else
 end
 
 figure
-set(gcf,'position',[227.3000  403.9000  720.5571  316.1000])
+set(gcf,'position',[251.2857  403.9000  485.1429  316.1000])
 left_color = [0.9153    0.2816    0.2878];
 right_color = [0 .5 .5];
 set(gcf,'defaultAxesColorOrder',[left_color; right_color]);
 yyaxis left
+set(gca,'fontsize',14)
 a=plot(energy,'o','markerfacecolor',left_color);
 hold on
 ind=find(energytotal>=90,1);
 plot(ind,energy(ind),'o','markerfacecolor',[0 0 0],'markersize',12)
 ylabel('% of energy')
 axis tight
+ylim([0 35])
 yyaxis right
+set(gca,'fontsize',14)
 plot(energytotal,'o','markerfacecolor',right_color)
 hold on
-plot(linspace(1,length(sig),100),90*ones(1,100),'--k','linewidth',1.75)
-ylabel('% of Energy Captured')
+plot(linspace(1,length(sig),100),90*ones(1,100),'--','color',right_color,'linewidth',1.75)
+ylabel('Cumulative Energy %')
 xlabel('mode')
 % set(gca, 'SortMethod', 'depth')
 axis tight
@@ -120,10 +123,10 @@ Ureplaced(nanRow>th,:)=NaN;
 Ureplaced(~(nanRow>th),:)=U;
 
 f=figure;
-set(f,'position',[331.8571   13.5714  822.8571  706.4286])
+set(f,'position',[ 331.8571   13.5714  760.0000  706.4286])
 [ha, pos]= tight_subplot(3,2,[.05 .15],[.1 .01],[.1 .1]);
 f2=figure;
-set(gcf,'position',[331.8571   13.5714  822.8571  706.4286])
+set(gcf,'position',[ 331.8571   13.5714  760.0000  706.4286])
 [ha2, pos2]= tight_subplot(3,2,[.05 .15],[.1 .01],[.1 .1]);
 p=1;
 pp=1;
@@ -132,14 +135,14 @@ for k = [1:5,ind]
     %Put NaNs back in
     if uv
         mode=Ureplaced(1:end/2,k);
-        mode=mode/max(mode,[],'all');
+        mode=mode/max(abs(mode),[],'all');
         mode2=Ureplaced(end/2+1:end,k);
-        mode2=mode2/max(mode2,[],'all');
+        mode2=mode2/max(abs(mode2),[],'all');
         titletext='u modes';
         titletext2='v modes';
     else
         mode=Ureplaced(:,k);
-        mode=mode/max(mode,[],'all');
+        mode=mode/max(abs(mode),[],'all');
         titletext='vmag modes';
     end
     pcolor(Xcrop,Ycrop,reshape(mode, [nx ny]))
@@ -153,7 +156,9 @@ for k = [1:5,ind]
     axis equal
     axis tight
     colorbar
+    caxis([-1 1])
     set(gca,'position',pos{p})
+    set(gca,'fontsize',12)
     p=p+1;
     if uv
         f2
@@ -169,7 +174,9 @@ for k = [1:5,ind]
         axis equal
         axis tight
         colorbar
+        caxis([-1 1])
         set(gca,'position',pos2{pp})
+        set(gca,'fontsize',12)
         pp=pp+1;
     end
 end
@@ -178,35 +185,7 @@ if uv
    print(f2,strcat(titletext2,run),'-dpng','-r600')
 end
 
-%% Reconstruct Each Angle 
-if ~uv
-figure
-set(gcf,'position',1.0e+03 *[0.0016    0.2079    1.4600    0.5120])
-[ha, pos]= tight_subplot(2,4,[0 0],[.01 .01],[.01 .01]);
-p=1;
-indRecon=ceil(size(Ureplaced,2)/2); %Reconstructs with 50 perc. of the modes
-% indRecon=ind; %Recontructs with 90 perc. of the energy
-for n=2:4:nRot
-    axes(ha(p))
-    ax=gca;
-    %Reconstruct and add mean back
-    tmpVmag=Ureplaced(:,1:indRecon)*S(1:indRecon,1:indRecon)*V(n,1:indRecon)'+Yavg;
-    pcolor(data(n).Interp.Xcrop,data(n).Interp.Ycrop,reshape(tmpVmag, [nx ny]))
-    hold on
-    plot(data(n).Interp.foil,'facecolor',[0 0 0],'facealpha',0.5...
-        ,'edgecolor','none')
-    ax.XAxis.Visible='off';
-    ax.YAxis.Visible='off';
-    title(strcat('\theta= ',num2str(data(n).theta)))
-    axis equal
-    axis tight
-    shading interp
-    caxis([0 3])
-    set(gca,'position',pos{p})
-    p=p+1;
-end
-print(gcf,strcat('velFieldsReconstruct',run),'-dpng','-r600')
-end
+
 
 
 
