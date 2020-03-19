@@ -7,23 +7,22 @@ workingfolder= 'C:\Users\abber\Documents\School\Grad School\Winter 20\AMATH 582\
 chord=4.06*10; %chord length in mm
 
 if plain
-workingfolder= 'C:\Users\abber\Documents\School\Grad School\Winter 20\AMATH 582\Project';
-t=0; %truncation
-run='Abby'; %what to append to all plot saving so things don't get overwritten between data sets
-%load data
-load(fullfile(workingfolder,'up1_1 Crop.mat'))
-rotFields = fieldnames(data);
-nRot = length(rotFields);
-%prep for PCA
-nx = 52; %size of the cropped fields that go into the SVD
-ny = 52;
-if uv
-Y = zeros(nx*ny*2, nRot);
-else
-Y = zeros(nx*ny, nRot);
-end
-xcrop=data.(rotFields{1}).interp.xcrop;
-ycrop=data.(rotFields{1}).interp.ycrop;
+    t=0; %truncation
+    run='Abby'; %what to append to all plot saving so things don't get overwritten between data sets
+    %load data
+    load(fullfile(workingfolder,'up1_1 Crop.mat'))
+    rotFields = fieldnames(data);
+    nRot = length(rotFields);
+    %prep for PCA
+    nx = 52; %size of the cropped fields that go into the SVD
+    ny = 52;
+    if uv
+        Y = zeros(nx*ny*2, nRot);
+    else
+        Y = zeros(nx*ny, nRot);
+    end
+    xcrop=data.(rotFields{1}).interp.xcrop;
+    ycrop=data.(rotFields{1}).interp.ycrop;
 end
 
 %% rPCA
@@ -46,46 +45,46 @@ Y = zeros(nx*ny, nRot-t);
 end
 
 % keep these variables outside loop if same for all rotations
-nxFull = up1_1FULL.deg_30.nx; 
-nyFull = up1_1FULL.deg_30.ny;
-
-for iRot = 1:nRot
-    u = up1_1FULL.(rotFields{iRot}).u;
-    v = up1_1FULL.(rotFields{iRot}).v;
-    vmag = up1_1FULL.(rotFields{iRot}).vmag;
-    mask_ind = up1_1FULL.(rotFields{iRot}).mask_inds;
-    lambda = 2; % choose your sparsity constant value (1 is often a good starting point)
-    tol = 1e-7; % set your tolerance
-    maxIter = 1000; % set your maximum number of iterations
-    if iRot>(7+t)
-        fl=1; %because of data rotation we need to flip the mask left to right
-    else
-        fl=0;
+    nxFull = up1_1FULL.deg_30.nx;
+    nyFull = up1_1FULL.deg_30.ny;
+    
+    for iRot = 1:nRot
+        u = up1_1FULL.(rotFields{iRot}).u;
+        v = up1_1FULL.(rotFields{iRot}).v;
+        vmag = up1_1FULL.(rotFields{iRot}).vmag;
+        mask_ind = up1_1FULL.(rotFields{iRot}).mask_inds;
+        lambda = 5; % choose your sparsity constant value (1 is often a good starting point)
+        tol = 1e-7; % set your tolerance
+        maxIter = 1000; % set your maximum number of iterations
+        if iRot>(7+t)
+            fl=1; %because of data rotation we need to flip the mask left to right
+        else
+            fl=0;
+        end
+        
+        % average all columns of L,N to get "rPCA cleaned" phase average
+        if uv
+            [up1_1FULL.(rotFields{iRot}).L, up1_1FULL.(rotFields{iRot}).N,mask_log(:,:,iRot)] ...
+                = rPCA_main(u,v,nxFull,nyFull, mask_ind, lambda, tol, maxIter,fl);
+            up1_1FULL.(rotFields{iRot}).Lr = mean(up1_1FULL.(rotFields{iRot}).L,2);
+            up1_1FULL.(rotFields{iRot}).Nr = mean(up1_1FULL.(rotFields{iRot}).N,2);
+            % put mask back in
+            [up1_1FULL.(rotFields{iRot}).uL,up1_1FULL.(rotFields{iRot}).vL] = ...
+                unstackPCA(up1_1FULL.(rotFields{iRot}).Lr,nxFull,nyFull,mask_log(:,:,iRot),1);
+            [up1_1FULL.(rotFields{iRot}).uN,up1_1FULL.(rotFields{iRot}).vN] = ...
+                unstackPCA(up1_1FULL.(rotFields{iRot}).Nr,nxFull,nyFull,mask_log(:,:,iRot),1);
+        else
+            [up1_1FULL.(rotFields{iRot}).L_vmag, up1_1FULL.(rotFields{iRot}).N_vmag,mask_log(:,:,iRot)] ...
+                = rPCA_main(vmag,[],nxFull,nyFull, mask_ind, lambda, tol, maxIter,fl);
+            up1_1FULL.(rotFields{iRot}).Lr_vmag = mean(up1_1FULL.(rotFields{iRot}).L_vmag,2);
+            up1_1FULL.(rotFields{iRot}).Nr_vmag = mean(up1_1FULL.(rotFields{iRot}).N_vmag,2);
+            % put mask back in
+            [up1_1FULL.(rotFields{iRot}).vmagL] = ...
+                unstackPCA(up1_1FULL.(rotFields{iRot}).Lr_vmag,nxFull,nyFull,mask_log(:,:,iRot),0);
+            [up1_1FULL.(rotFields{iRot}).vmagN] = ...
+                unstackPCA(up1_1FULL.(rotFields{iRot}).Nr_vmag,nxFull,nyFull,mask_log(:,:,iRot),0);
+        end
     end
- 
-    % average all columns of L,N to get "rPCA cleaned" phase average
-    if uv
-        [up1_1FULL.(rotFields{iRot}).L, up1_1FULL.(rotFields{iRot}).N,mask_log(:,:,iRot)] ...
-            = rPCA_main(u,v,nxFull,nyFull, mask_ind, lambda, tol, maxIter,fl);
-        up1_1FULL.(rotFields{iRot}).Lr = mean(up1_1FULL.(rotFields{iRot}).L,2);
-        up1_1FULL.(rotFields{iRot}).Nr = mean(up1_1FULL.(rotFields{iRot}).N,2);
-        % put mask back in
-        [up1_1FULL.(rotFields{iRot}).uL,up1_1FULL.(rotFields{iRot}).vL] = ...
-            unstackPCA(up1_1FULL.(rotFields{iRot}).Lr,nxFull,nyFull,mask_log(:,:,iRot),1);
-        [up1_1FULL.(rotFields{iRot}).uN,up1_1FULL.(rotFields{iRot}).vN] = ...
-            unstackPCA(up1_1FULL.(rotFields{iRot}).Nr,nxFull,nyFull,mask_log(:,:,iRot),1);
-    else
-        [up1_1FULL.(rotFields{iRot}).L_vmag, up1_1FULL.(rotFields{iRot}).N_vmag,mask_log(:,:,iRot)] ...
-            = rPCA_main(vmag,[],nxFull,nyFull, mask_ind, lambda, tol, maxIter,fl);
-        up1_1FULL.(rotFields{iRot}).Lr_vmag = mean(up1_1FULL.(rotFields{iRot}).L_vmag,2);
-        up1_1FULL.(rotFields{iRot}).Nr_vmag = mean(up1_1FULL.(rotFields{iRot}).N_vmag,2);
-        % put mask back in
-        [up1_1FULL.(rotFields{iRot}).vmagL] = ...
-            unstackPCA(up1_1FULL.(rotFields{iRot}).Lr_vmag,nxFull,nyFull,mask_log(:,:,iRot),0);
-        [up1_1FULL.(rotFields{iRot}).vmagN] = ...
-            unstackPCA(up1_1FULL.(rotFields{iRot}).Nr_vmag,nxFull,nyFull,mask_log(:,:,iRot),0);
-    end
-end
 % checks for rPCA
 % lambdaCheck(up1_1FULL.deg_30.uL, up1_1FULL.deg_30.vL,up1_1FULL.deg_30.uN...
 %     , up1_1FULL.deg_30.vN, lambda)
@@ -108,7 +107,6 @@ save(fullfile(workingfolder,'up1_1FULL rPCA'),'up1_1FULL')
 % caxis([-1.5 2])
 % colorbar
 
-if ~uv
 fvar=figure;
 set(gcf,'position',1.0e+03 *[0.4124    0.2473    1.0280    0.4727])
 %Calculate Variance and plot
@@ -171,7 +169,6 @@ set(gca,'position',pos);
 set(gca,'fontsize',14);
 set(gca,'colormap',hot);
 print(gcf,'rPCA variance','-dpng','-r600')
-end
 
 % Crops data for PCA
 DataCrop_rPCA(fullfile(workingfolder,'up1_1FULL rPCA'),t,0,uv)
@@ -194,8 +191,47 @@ for iRot = 1:nRot
         Y(:,iRot) = reshape(data.(rotFields{iRot}).interp.vmag_crop, [nx*ny 1]);
     end
 end
-
-%% Vel field plotting
+%% Vel field plotting -rPCA
+if ~plain
+    figure('DefaultAxesFontsize', 16)
+    %set(gcf,'position',1.0e+03 *[0.0016    0.2079    1.4600    0.5120])
+    ax=gca;
+    pcolor(data.deg_137.interp.xcrop,data.deg_137.interp.ycrop,data.deg_137.interp.vmag_cropL)
+    hold on
+    plot(data.deg_137.interp.foil,'facecolor',[0 0 0],'facealpha',0.5...
+        ,'edgecolor','none')
+    axis equal
+    axis tight
+    shading interp
+    caxis([-1,2.5])
+    c=colorbar;
+    c.FontSize=12;
+    % set(c,'position',[0.7585    0.0513    0.0180    0.4074])
+    set(get(c,'title'),'string','$(\frac{V_{mag}}{U_\infty})$','interpreter','latex');
+    xlabel('x/c')
+    ylabel('y/c')
+    title(['L   \lambda = ' num2str(lambda) ])
+    
+    figure('DefaultAxesFontsize', 16)
+    %set(gcf,'position',1.0e+03 *[0.0016    0.2079    1.4600    0.5120])
+    ax=gca;
+    pcolor(data.deg_137.interp.xcrop,data.deg_137.interp.ycrop,data.deg_137.interp.vmag_cropN)
+    hold on
+    plot(data.deg_137.interp.foil,'facecolor',[0 0 0],'facealpha',0.5...
+        ,'edgecolor','none')
+    axis equal
+    axis tight
+    shading interp
+    caxis([-1,2.5])
+    c=colorbar;
+    c.FontSize=12;
+    % set(c,'position',[0.7585    0.0513    0.0180    0.4074])
+    set(get(c,'title'),'string','$(\frac{V_{mag}}{U_\infty})$','interpreter','latex');
+    xlabel('x/c')
+    ylabel('y/c')
+    title(['N   \lambda = ' num2str(lambda) ])
+end
+%% Vel field plotting- plain
 if plain
 figure
 set(gcf,'position',1.0e+03 *[0.0016    0.2079    1.4600    0.5120])
@@ -233,6 +269,7 @@ axes(ha(end))
 set(gca,'Visible','off')
 print(gcf,strcat('velFields',run),'-dpng','-r600')
 end
+
 %% mean-subtract and fill in NaNs for SVD
 Yavg = mean(Y,2,'omitnan'); %compute row mean for subtraction
 Yms =Y-Yavg*ones(1,size(Y,2)); % Y mean-subtracted
@@ -272,6 +309,7 @@ yyaxis left
 set(gca,'fontsize',14)
 a=plot(energy,'o','markerfacecolor',left_color);
 hold on
+
 ind=find(energytotal>=90,1);
 plot(ind,energy(ind),'o','markerfacecolor',[0 0 0],'markersize',12)
 ylabel('% of energy')
@@ -355,9 +393,9 @@ for k = [1:5,ind]
 end
 print(f,strcat(titletext,run),'-dpng','-r600')
 if uv
-   print(f2,strcat(titletext2,run),'-dpng','-r600')
+    print(f2,strcat(titletext2,run),'-dpng','-r600')
 end
-% %% Reconstruct Each Angle 
+ %% Reconstruct Each Angle
 % if ~uv
 % figure
 % set(gcf,'position',1.0e+03 *[0.0016    0.2079    1.4600    0.5120])
@@ -387,3 +425,19 @@ end
 % end
 % print(gcf,strcat('velFieldsReconstruct',run),'-dpng','-r600')
 % end
+
+%% plot how modes evolve with angle (right singular vectors)
+angles = [48 57 66 75 84 93 98 101 110 119 137 146 155 164];
+
+figure
+p1 = plot(V(:,1),'k-','Linewidth',[2]) ;
+hold on
+p2 = plot(V(:,2),'k--','Linewidth',[2]) ;
+plot(V(:,3),'k:','Linewidth',[2])
+legend('mode 1', 'mode 2', 'mode 3', 'Location', 'northwest')
+ylabel('V')
+xlabel('angle, degrees')
+xticklabels(angles)
+uistack(p2, 'top')
+uistack(p1, 'top')
+hold off
