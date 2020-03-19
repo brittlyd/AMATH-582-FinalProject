@@ -1,3 +1,6 @@
+
+
+function [X,mask_log] = stackPCA2(u,v,nx,ny,mask_ind,fl)
 %%% This function takes in one or two arrays (u,v) as well as a 
 %%% vector of linear indices for the mask on the frame (mask_ind) and
 %%% outputs a column vector, X, that contains the reshaped data from the u
@@ -5,13 +8,9 @@
 %%% the remaining NaNs are replaced with outliers (very large, positive
 %%% values). 
 
-function [X,mask_log] = stackPCA2(u,v,nx,ny,mask_ind,fl)
-%%% Turns mask_ind into logical. Need to reshpape the mask_ind vector as ny
-%%% by nx. Also need to transpose. This works because of the way
-%%% matlab indexes matricies and how I wrote everything in my PIV
-%%% processing code. Commented out, but can plot after to show the mask (yellow area). The result
-%%% mask_log is a matrix of logicals that is nx by ny which is the same size as the
-%%% velocity fields
+%%% Turns mask_ind into logical. 
+%%% mask_log is a matrix of logicals that is nx by ny which is the same size 
+%%% as the velocity fields
 
 
 mask_log=zeros(nx*ny,1);
@@ -20,12 +19,6 @@ mask_log=logical(reshape(mask_log,[ny,nx])');
 if fl
     mask_log=fliplr(mask_log);
 end
-%figure
-% pcolor(mask_log')
-% axis equal
-% figure
-% pcolor(u')
-% axis equal
 
 %%% Remove indices for mask
 u(mask_log) = [];

@@ -13,7 +13,7 @@ if isv
     for i = 1:nt
         [X(:,i),mask_log] = stackPCA2(u(:,:,i),v(:,:,i),nx,ny,mask_ind,fl);
         %each frame for a certain angle has the same mask so we can just
-        %overwrite mask_log each time. We dont need to store each iteration
+        %overwrite mask_log each time
     end
 else
     X = zeros((nx*ny-length(mask_ind)), nt);
@@ -22,8 +22,6 @@ else
     end
 end
 
-% avgX = mean(X,2)*ones(1,size(X,2));
-% X = X - avgX;
 %% rPCA
 addpath(genpath('RPCA-PIV-master'));
 

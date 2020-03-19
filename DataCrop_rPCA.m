@@ -1,4 +1,8 @@
 function DataCrop_rPCA(DataSet,truncateStart,truncateEnd,uv)
+%%% crops and aligns velocity field after rPCA processing
+%%% outputs both L and N for velocity magnitude
+%%% outputs only L for u and v
+
 load(DataSet);
 data=up1_1FULL;
 chord=4.06*10; %mm

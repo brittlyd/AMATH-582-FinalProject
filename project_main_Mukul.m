@@ -4,7 +4,7 @@ run='Mukul';%what to append to all plot saving so things don't get
 %overwritten between data sets
 
 %load data
-load("C:\Users\abber\Documents\School\Grad School\Winter 20\AMATH 582\Project\Mukul flow_data Crop.mat")
+load("Mukul flow_data Crop.mat")
 nRot = length(data);
 nRot = 32; %for just the upstream portion 
 nx = 52;

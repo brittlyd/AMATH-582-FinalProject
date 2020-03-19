@@ -1,4 +1,6 @@
 function DataCrop(DataSet,truncateStart,truncateEnd)
+%%% crops and aligns velocity field frames 
+
 load(DataSet);
 chord=4.06*10; %mm
 theta_p=6; %preset pitch angle in degrees
