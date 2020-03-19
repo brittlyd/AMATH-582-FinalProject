@@ -1,9 +1,9 @@
 clear all, close all
 %% Setup
 %Choose if doing plain PCA or rPCA and with uv or with vmag
-plain=0; %1 for plain PCA 0 for rPCA
+plain=1; %1 for plain PCA 0 for rPCA
 uv=0; %1 for uv and 0 for vmag
-workingfolder= 'C:\Users\abber\Documents\School\Grad School\Winter 20\AMATH 582\Project';
+workingfolder= '';
 chord=4.06*10; %chord length in mm
 
 if plain
@@ -52,7 +52,7 @@ if ~plain
         v = up1_1FULL.(rotFields{iRot}).v;
         vmag = up1_1FULL.(rotFields{iRot}).vmag;
         mask_ind = up1_1FULL.(rotFields{iRot}).mask_inds;
-        lambda = 2; % choose your sparsity constant value (1 is often a good starting point)
+        lambda = 5; % choose your sparsity constant value (1 is often a good starting point)
         tol = 1e-7; % set your tolerance
         maxIter = 1000; % set your maximum number of iterations
         if iRot>(7+t)
@@ -92,54 +92,54 @@ if ~plain
     save(fullfile(workingfolder,'up1_1FULL rPCA'),'up1_1FULL')
     
     %Calculate Variance and plot
-    if ~uv
-        fvar=figure;
-        set(gcf,'position',[633.5714  313.5714  806.8286  406.4286])
-        
-        subplot(1,3,1)
-        pcolor(up1_1FULL.(rotFields{13}).x/chord,up1_1FULL.(rotFields{13}).y/chord...
-            ,up1_1FULL.(rotFields{13}).vmag(:,:,1)')
-        shading flat
-        axis equal
-        axis tight
-        hold on
-        plot(up1_1FULL.(rotFields{13}).foil,'facecolor',[0 0 0],'facealpha',0.5...
-            ,'edgecolor','none')
-        title('Single Frame')
-        
-        subplot(1,3,2)
-        var_plain=nanmean((up1_1FULL.(rotFields{13}).vmag...
-            -nanmean(up1_1FULL.(rotFields{13}).vmag,3)).^2,3);
-        pcolor(up1_1FULL.(rotFields{13}).x/chord,up1_1FULL.(rotFields{13}).y/chord...
-            ,(var_plain/max(var_plain,[],'all'))')
-        shading flat
-        axis equal
-        axis tight
-        hold on
-        plot(up1_1FULL.(rotFields{13}).foil,'facecolor',[0 0 0],'facealpha',0.5...
-            ,'edgecolor','none')
-        title('\langle v''_{mag}^2 \rangle')
-        
-        var=mean((up1_1FULL.(rotFields{13}).L_vmag...
-            -mean(up1_1FULL.(rotFields{13}).L_vmag,2)).^2,2);
-        [var_vmag] = unstackPCA(var,nxFull,nyFull,mask_log(:,:,13),0);
-        
-        subplot(1,3,3)
-        pcolor(up1_1FULL.(rotFields{13}).x/chord,up1_1FULL.(rotFields{13}).y/chord...
-            ,(var_vmag/max(var_vmag,[],'all'))')
-        shading flat
-        axis equal
-        axis tight
-        hold on
-        plot(up1_1FULL.(rotFields{13}).foil,'facecolor',[0 0 0],'facealpha',0.5...
-            ,'edgecolor','none')
-        title('\langle v''_{mag}^2 \rangle after rPCA')
-        c=colorbar;
-        set(c,'position',[0.9226    0.2804    0.0263    0.4742])
-        sgtitle(strcat('\theta = '...
-            , rotFields{13}(strfind(rotFields{13},'_')+1:end),char(176)))
-        print(gcf,'rPCA variance','-dpng','-r600')
-    end
+%     if ~uv
+%         fvar=figure;
+%         set(gcf,'position',[633.5714  313.5714  806.8286  406.4286])
+%         
+%         subplot(1,3,1)
+%         pcolor(up1_1FULL.(rotFields{13}).x/chord,up1_1FULL.(rotFields{13}).y/chord...
+%             ,up1_1FULL.(rotFields{13}).vmag(:,:,1)')
+%         shading flat
+%         axis equal
+%         axis tight
+%         hold on
+%         plot(up1_1FULL.(rotFields{13}).foil,'facecolor',[0 0 0],'facealpha',0.5...
+%             ,'edgecolor','none')
+%         title('Single Frame')
+%         
+%         subplot(1,3,2)
+%         var_plain=nanmean((up1_1FULL.(rotFields{13}).vmag...
+%             -nanmean(up1_1FULL.(rotFields{13}).vmag,3)).^2,3);
+%         pcolor(up1_1FULL.(rotFields{13}).x/chord,up1_1FULL.(rotFields{13}).y/chord...
+%             ,(var_plain/max(var_plain,[],'all'))')
+%         shading flat
+%         axis equal
+%         axis tight
+%         hold on
+%         plot(up1_1FULL.(rotFields{13}).foil,'facecolor',[0 0 0],'facealpha',0.5...
+%             ,'edgecolor','none')
+%         title('\langle v''_{mag}^2 \rangle')
+%         
+%         var=mean((up1_1FULL.(rotFields{13}).L_vmag...
+%             -mean(up1_1FULL.(rotFields{13}).L_vmag,2)).^2,2);
+%         [var_vmag] = unstackPCA(var,nxFull,nyFull,mask_log(:,:,13),0);
+%         
+%         subplot(1,3,3)
+%         pcolor(up1_1FULL.(rotFields{13}).x/chord,up1_1FULL.(rotFields{13}).y/chord...
+%             ,(var_vmag/max(var_vmag,[],'all'))')
+%         shading flat
+%         axis equal
+%         axis tight
+%         hold on
+%         plot(up1_1FULL.(rotFields{13}).foil,'facecolor',[0 0 0],'facealpha',0.5...
+%             ,'edgecolor','none')
+%         title('\langle v''_{mag}^2 \rangle after rPCA')
+%         c=colorbar;
+%         set(c,'position',[0.9226    0.2804    0.0263    0.4742])
+%         sgtitle(strcat('\theta = '...
+%             , rotFields{13}(strfind(rotFields{13},'_')+1:end),char(176)))
+%         print(gcf,'rPCA variance','-dpng','-r600')
+%     end
     
     % Crops data for PCA
     DataCrop_rPCA(fullfile(workingfolder,'up1_1FULL rPCA'),t,0,uv)
@@ -163,7 +163,47 @@ for iRot = 1:nRot
     end
 end
 
-%% Vel field plotting
+%% Vel field plotting -rPCA
+if ~plain
+    figure('DefaultAxesFontsize', 16)
+    %set(gcf,'position',1.0e+03 *[0.0016    0.2079    1.4600    0.5120])
+    ax=gca;
+    pcolor(data.deg_137.interp.xcrop,data.deg_137.interp.ycrop,data.deg_137.interp.vmag_cropL)
+    hold on
+    plot(data.deg_137.interp.foil,'facecolor',[0 0 0],'facealpha',0.5...
+        ,'edgecolor','none')
+    axis equal
+    axis tight
+    shading interp
+    caxis([-1,2.5])
+    c=colorbar;
+    c.FontSize=12;
+    % set(c,'position',[0.7585    0.0513    0.0180    0.4074])
+    set(get(c,'title'),'string','$(\frac{V_{mag}}{U_\infty})$','interpreter','latex');
+    xlabel('x/c')
+    ylabel('y/c')
+    title(['L   \lambda = ' num2str(lambda) ])
+    
+    figure('DefaultAxesFontsize', 16)
+    %set(gcf,'position',1.0e+03 *[0.0016    0.2079    1.4600    0.5120])
+    ax=gca;
+    pcolor(data.deg_137.interp.xcrop,data.deg_137.interp.ycrop,data.deg_137.interp.vmag_cropN)
+    hold on
+    plot(data.deg_137.interp.foil,'facecolor',[0 0 0],'facealpha',0.5...
+        ,'edgecolor','none')
+    axis equal
+    axis tight
+    shading interp
+    caxis([-1,2.5])
+    c=colorbar;
+    c.FontSize=12;
+    % set(c,'position',[0.7585    0.0513    0.0180    0.4074])
+    set(get(c,'title'),'string','$(\frac{V_{mag}}{U_\infty})$','interpreter','latex');
+    xlabel('x/c')
+    ylabel('y/c')
+    title(['N   \lambda = ' num2str(lambda) ])
+end
+%% Vel field plotting- plain
 % if plain
 % figure
 % set(gcf,'position',1.0e+03 *[0.0016    0.2079    1.4600    0.5120])
@@ -353,14 +393,14 @@ end
 % end
 
 %% plot how modes evolve with angle (right singular vectors)
-angles = [30 39 48 57 66 75 84 93 98 101 110 119 137 146 155 164];
+angles = [48 57 66 75 84 93 98 101 110 119 137 146 155 164];
 
 figure
-p1 = plot(V(:,2),'k-','Linewidth',[2]) ;
+p1 = plot(V(:,1),'k-','Linewidth',[2]) ;
 hold on
-p2 = plot(V(:,3),'k--','Linewidth',[2]) ;
-plot(V(:,4),'k:','Linewidth',[2])
-legend('mode 2', 'mode 3', 'mode 4', 'Location', 'northwest')
+p2 = plot(V(:,2),'k--','Linewidth',[2]) ;
+plot(V(:,3),'k:','Linewidth',[2])
+legend('mode 1', 'mode 2', 'mode 3', 'Location', 'northwest')
 ylabel('V')
 xlabel('angle, degrees')
 xticklabels(angles)
