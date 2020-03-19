@@ -393,14 +393,14 @@ end
 % end
 
 %% plot how modes evolve with angle (right singular vectors)
-angles = [30 39 48 57 66 75 84 93 98 101 110 119 137 146 155 164];
+angles = [48 57 66 75 84 93 98 101 110 119 137 146 155 164];
 
 figure
-p1 = plot(V(:,2),'k-','Linewidth',[2]) ;
+p1 = plot(V(:,1),'k-','Linewidth',[2]) ;
 hold on
-p2 = plot(V(:,3),'k--','Linewidth',[2]) ;
-plot(V(:,4),'k:','Linewidth',[2])
-legend('mode 2', 'mode 3', 'mode 4', 'Location', 'northwest')
+p2 = plot(V(:,2),'k--','Linewidth',[2]) ;
+plot(V(:,3),'k:','Linewidth',[2])
+legend('mode 1', 'mode 2', 'mode 3', 'Location', 'northwest')
 ylabel('V')
 xlabel('angle, degrees')
 xticklabels(angles)
