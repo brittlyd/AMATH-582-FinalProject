@@ -1,7 +1,7 @@
 clear all, close all
 %% Setup
 %Choose if doing plain PCA or rPCA and with uv or with vmag
-plain=0; %1 for plain PCA 0 for rPCA
+plain=1; %1 for plain PCA 0 for rPCA
 uv=0; %1 for uv and 0 for vmag
 workingfolder= 'C:\Users\abber\Documents\School\Grad School\Winter 20\AMATH 582\Project';
 chord=4.06*10; %chord length in mm
@@ -42,7 +42,7 @@ ny = 52;
 if uv
 Y = zeros(nx*ny*2, nRot);
 else
-Y = zeros(nx*ny, nRot);
+Y = zeros(nx*ny, nRot-t);
 end
 
 % keep these variables outside loop if same for all rotations
@@ -110,7 +110,7 @@ save(fullfile(workingfolder,'up1_1FULL rPCA'),'up1_1FULL')
 
 if ~uv
 fvar=figure;
-set(gcf,'position',[633.5714  313.5714  806.8286  406.4286])
+set(gcf,'position',1.0e+03 *[0.4124    0.2473    1.0280    0.4727])
 %Calculate Variance and plot
 subplot(1,3,1)
 pcolor(up1_1FULL.(rotFields{13}).x/chord,up1_1FULL.(rotFields{13}).y/chord...
@@ -122,6 +122,14 @@ hold on
 plot(up1_1FULL.(rotFields{13}).foil,'facecolor',[0 0 0],'facealpha',0.5...
     ,'edgecolor','none')
 title('Single Frame')
+xlabel('x/c')
+ylabel('y/c')
+pos=get(gca,'position');
+colorbar('eastoutside')
+set(gca,'position',pos);
+set(gca,'colormap',parula);
+set(gca,'fontsize',14);
+
 subplot(1,3,2)
 var_plain=nanmean((up1_1FULL.(rotFields{13}).vmag...
     -nanmean(up1_1FULL.(rotFields{13}).vmag,3)).^2,3);
@@ -133,7 +141,14 @@ axis tight
 hold on
 plot(up1_1FULL.(rotFields{13}).foil,'facecolor',[0 0 0],'facealpha',0.5...
     ,'edgecolor','none')
-title('\langle v''_{mag}^2 \rangle')
+title('\langle \sigma^2 \rangle')
+xlabel('x/c')
+ylabel('y/c')
+pos=get(gca,'position');
+colorbar('eastoutside')
+set(gca,'position',pos);
+set(gca,'colormap',hot);
+set(gca,'fontsize',16);
 
 var=mean((up1_1FULL.(rotFields{13}).L_vmag...
     -mean(up1_1FULL.(rotFields{13}).L_vmag,2)).^2,2);
@@ -147,11 +162,14 @@ axis tight
 hold on
 plot(up1_1FULL.(rotFields{13}).foil,'facecolor',[0 0 0],'facealpha',0.5...
     ,'edgecolor','none')
-title('\langle v''_{mag}^2 \rangle after rPCA')
-c=colorbar;
-set(c,'position',[0.9226    0.2804    0.0263    0.4742])
-sgtitle(strcat('\theta = '...
-    , rotFields{13}(strfind(rotFields{13},'_')+1:end),char(176)))
+title('\langle \sigma^2 \rangle after rPCA')
+xlabel('x/c')
+ylabel('y/c')
+pos=get(gca,'position');
+colorbar('eastoutside')
+set(gca,'position',pos);
+set(gca,'fontsize',14);
+set(gca,'colormap',hot);
 print(gcf,'rPCA variance','-dpng','-r600')
 end
 
@@ -178,43 +196,43 @@ for iRot = 1:nRot
 end
 
 %% Vel field plotting
-% if plain
-% figure
-% set(gcf,'position',1.0e+03 *[0.0016    0.2079    1.4600    0.5120])
-% [ha, pos]= tight_subplot(2,4,[0 0],[.01 .01],[.01 .01]);
-% p=1;
-% for n=1:ceil(nRot/8):nRot
-%     axes(ha(p))
-%     ax=gca;
-%     set(gca,'Visible','off')
-%     tmpU=data.(rotFields{n}).interp.u_crop;
-%     tmpV=data.(rotFields{n}).interp.v_crop;
-%     tmpVmag=data.(rotFields{n}).interp.vmag_crop;
-%     pcolor(data.(rotFields{n}).interp.xcrop,data.(rotFields{n}).interp.ycrop,tmpVmag)
-%     hold on
-%     quiver(data.(rotFields{n}).interp.xcrop(1:2:end)...
-%         ,data.(rotFields{n}).interp.ycrop(1:2:end),tmpU(1:2:end,1:2:end)...
-%         ,tmpV(1:2:end,1:2:end),2,'k')
-%     plot(data.(rotFields{n}).interp.foil,'facecolor',[0 0 0],'facealpha',0.5...
-%         ,'edgecolor','none')
-%     ax.XAxis.Visible='off';
-%     ax.YAxis.Visible='off';
-%     title(strcat('\theta= ',(rotFields{n}(strfind(rotFields{n},'_')+1:end))))
-%     axis equal
-%     axis tight
-%     shading interp
-%     caxis([0,3])
-%     set(gca,'position',pos{p})
-%     p=p+1;
-% end
-% c=colorbar;
-% c.FontSize=12;
-% set(c,'position',[0.7585    0.0513    0.0180    0.4074])
-% set(get(c,'title'),'string','$(\frac{V_{mag}}{U_\infty})$','interpreter','latex');
-% axes(ha(end))
-% set(gca,'Visible','off')
-% print(gcf,strcat('velFields',run),'-dpng','-r600')
-% end
+if plain
+figure
+set(gcf,'position',1.0e+03 *[0.0016    0.2079    1.4600    0.5120])
+[ha, pos]= tight_subplot(2,4,[0 0],[.01 .01],[.01 .01]);
+p=1;
+for n=1:ceil(nRot/8):nRot
+    axes(ha(p))
+    ax=gca;
+    set(gca,'Visible','off')
+    tmpU=data.(rotFields{n}).interp.u_crop;
+    tmpV=data.(rotFields{n}).interp.v_crop;
+    tmpVmag=data.(rotFields{n}).interp.vmag_crop;
+    pcolor(data.(rotFields{n}).interp.xcrop,data.(rotFields{n}).interp.ycrop,tmpVmag)
+    hold on
+    quiver(data.(rotFields{n}).interp.xcrop(1:2:end)...
+        ,data.(rotFields{n}).interp.ycrop(1:2:end),tmpU(1:2:end,1:2:end)...
+        ,tmpV(1:2:end,1:2:end),2,'k')
+    plot(data.(rotFields{n}).interp.foil,'facecolor',[0 0 0],'facealpha',0.5...
+        ,'edgecolor','none')
+    ax.XAxis.Visible='off';
+    ax.YAxis.Visible='off';
+    title(strcat('\theta= ',(rotFields{n}(strfind(rotFields{n},'_')+1:end))))
+    axis equal
+    axis tight
+    shading interp
+    caxis([0,3])
+    set(gca,'position',pos{p})
+    p=p+1;
+end
+c=colorbar;
+c.FontSize=12;
+set(c,'position',[0.7585    0.0513    0.0180    0.4074])
+set(get(c,'title'),'string','$(\frac{V_{mag}}{U_\infty})$','interpreter','latex');
+axes(ha(end))
+set(gca,'Visible','off')
+print(gcf,strcat('velFields',run),'-dpng','-r600')
+end
 %% mean-subtract and fill in NaNs for SVD
 Yavg = mean(Y,2,'omitnan'); %compute row mean for subtraction
 Yms =Y-Yavg*ones(1,size(Y,2)); % Y mean-subtracted
@@ -246,22 +264,25 @@ end
 % end
 
 figure
-set(gcf,'position',[227.3000  403.9000  720.5571  316.1000])
+set(gcf,'position',[251.2857  403.9000  485.1429  316.1000])
 left_color = [0.9153    0.2816    0.2878];
 right_color = [0 .5 .5];
 set(gcf,'defaultAxesColorOrder',[left_color; right_color]);
 yyaxis left
+set(gca,'fontsize',14)
 a=plot(energy,'o','markerfacecolor',left_color);
 hold on
 ind=find(energytotal>=90,1);
 plot(ind,energy(ind),'o','markerfacecolor',[0 0 0],'markersize',12)
 ylabel('% of energy')
 axis tight
+ylim([0 35])
 yyaxis right
+set(gca,'fontsize',14)
 plot(energytotal,'o','markerfacecolor',right_color)
 hold on
-plot(linspace(1,length(sig),100),90*ones(1,100),'--k','linewidth',1.75)
-ylabel('% of Energy Captured')
+plot(linspace(1,length(sig),100),90*ones(1,100),'--','color',right_color,'linewidth',1.75)
+ylabel('Cumulative Energy %')
 xlabel('mode')
 % set(gca, 'SortMethod', 'depth')
 axis tight
@@ -275,10 +296,10 @@ Ureplaced(nanRow>th,:)=NaN;
 Ureplaced(~(nanRow>th),:)=U;
 
 f=figure;
-set(f,'position',[331.8571   13.5714  822.8571  706.4286])
+set(f,'position',[ 331.8571   13.5714  760.0000  706.4286])
 [ha, pos]= tight_subplot(3,2,[.05 .15],[.1 .01],[.1 .1]);
 f2=figure;
-set(f2,'position',[331.8571   13.5714  822.8571  706.4286])
+set(f2,'position',[ 331.8571   13.5714  760.0000  706.4286])
 [ha2, pos2]= tight_subplot(3,2,[.05 .15],[.1 .01],[.1 .1]);
 j=1;
 for k = [1:5,ind]
@@ -287,14 +308,14 @@ for k = [1:5,ind]
     %Put NaNs back in
     if uv
         mode=Ureplaced(1:end/2,k);
-        mode=mode/max(mode,[],'all');
+        mode=mode/max(abs(mode),[],'all');
         mode2=Ureplaced(end/2+1:end,k);
-        mode2=mode2/max(mode2,[],'all');
+        mode2=mode2/max(abs(mode2),[],'all');
         titletext='u modes';
         titletext2='v modes';
     else
         mode=Ureplaced(:,k);
-        mode=mode/max(mode,[],'all');
+        mode=mode/max(abs(mode),[],'all');
         titletext='vmag modes';
     end
     pcolor(xcrop,ycrop,reshape(mode, [nx ny]))
@@ -308,6 +329,8 @@ for k = [1:5,ind]
     axis equal
     axis tight
     colorbar
+    caxis([-1 1])
+    set(gca,'fontsize',12)
     set(gca,'position',pos{j})
     
     if uv
@@ -324,6 +347,8 @@ for k = [1:5,ind]
         axis equal
         axis tight
         colorbar
+        caxis([-1 1])
+        set(gca,'fontsize',12)
         set(gca,'position',pos2{j})
     end
     j=j+1;
