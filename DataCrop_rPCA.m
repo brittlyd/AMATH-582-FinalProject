@@ -65,7 +65,8 @@ for i=a+1:length(names)-b
     U_trans=data.(names{i}).uL';
     V_trans=data.(names{i}).vL';
     else
-    Vmag_trans=data.(names{i}).vmagL';
+    Vmag_transL=data.(names{i}).vmagL';
+    Vmag_transN=data.(names{i}).vmagN';
     end
     
     %Move all croped data so the bottom left corner of the bounding box is at (0,0) 
@@ -75,8 +76,11 @@ for i=a+1:length(names)-b
     U_crop=U_trans(ind);
     V_crop=V_trans(ind);
     else
-    Vmag_crop=Vmag_trans(ind);
-    end
+    Vmag_cropL=Vmag_transL(ind);
+    Vmag_cropN=Vmag_transN(ind);
+    
+    endVmagL_crop=Vmag_transL(ind);
+    endVmagN_crop=Vmag_transN(ind);
 
     %Shift the foil vertices as well
     foilrot.Vertices(:,1)=foilrot.Vertices(:,1)-min(xbound);
@@ -96,8 +100,10 @@ for i=a+1:length(names)-b
     data.(names{i}).interp.v_crop=griddata(Xcrop/chord,Ycrop/chord...
         ,V_crop,xgrid{i},ygrid{i});
     else
-    data.(names{i}).interp.vmag_crop=griddata(Xcrop/chord,Ycrop/chord...
-        ,Vmag_crop,xgrid{i},ygrid{i});
+    data.(names{i}).interp.vmag_cropL=griddata(Xcrop/chord,Ycrop/chord...
+        ,Vmag_cropL,xgrid{i},ygrid{i});
+    data.(names{i}).interp.vmag_cropN=griddata(Xcrop/chord,Ycrop/chord...
+        ,Vmag_cropN,xgrid{i},ygrid{i});
     end
     data.(names{i}).interp.foil=foilrot;
 end

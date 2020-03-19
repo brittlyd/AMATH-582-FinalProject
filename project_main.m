@@ -1,7 +1,7 @@
 clear all, close all
 %% Setup
 %Choose if doing plain PCA or rPCA and with uv or with vmag
-plain=0; %1 for plain PCA 0 for rPCA
+plain=1; %1 for plain PCA 0 for rPCA
 uv=0; %1 for uv and 0 for vmag
 workingfolder= '';
 chord=4.06*10; %chord length in mm
@@ -52,7 +52,7 @@ if ~plain
         v = up1_1FULL.(rotFields{iRot}).v;
         vmag = up1_1FULL.(rotFields{iRot}).vmag;
         mask_ind = up1_1FULL.(rotFields{iRot}).mask_inds;
-        lambda = 2; % choose your sparsity constant value (1 is often a good starting point)
+        lambda = 5; % choose your sparsity constant value (1 is often a good starting point)
         tol = 1e-7; % set your tolerance
         maxIter = 1000; % set your maximum number of iterations
         if iRot>(7+t)
@@ -164,25 +164,45 @@ for iRot = 1:nRot
 end
 
 %% Vel field plotting -rPCA
-figure
-%set(gcf,'position',1.0e+03 *[0.0016    0.2079    1.4600    0.5120])
-ax=gca;
-pcolor(data.deg_137.interp.xcrop,data.deg_137.interp.ycrop,data.deg_137.interp.vmag_crop)
-hold on
-plot(data.deg_137.interp.foil,'facecolor',[0 0 0],'facealpha',0.5...
-    ,'edgecolor','none')
-axis equal
-axis tight
-shading interp
-% caxis([0,3])
-c=colorbar;
-c.FontSize=12;
-% set(c,'position',[0.7585    0.0513    0.0180    0.4074])
-set(get(c,'title'),'string','$(\frac{V_{mag}}{U_\infty})$','interpreter','latex');
-xlabel('x/c')
-ylabel('y/c')
-title(['\lambda = ' num2str(lambda) ])
-
+if ~plain
+    figure('DefaultAxesFontsize', 16)
+    %set(gcf,'position',1.0e+03 *[0.0016    0.2079    1.4600    0.5120])
+    ax=gca;
+    pcolor(data.deg_137.interp.xcrop,data.deg_137.interp.ycrop,data.deg_137.interp.vmag_cropL)
+    hold on
+    plot(data.deg_137.interp.foil,'facecolor',[0 0 0],'facealpha',0.5...
+        ,'edgecolor','none')
+    axis equal
+    axis tight
+    shading interp
+    caxis([-1,2.5])
+    c=colorbar;
+    c.FontSize=12;
+    % set(c,'position',[0.7585    0.0513    0.0180    0.4074])
+    set(get(c,'title'),'string','$(\frac{V_{mag}}{U_\infty})$','interpreter','latex');
+    xlabel('x/c')
+    ylabel('y/c')
+    title(['L   \lambda = ' num2str(lambda) ])
+    
+    figure('DefaultAxesFontsize', 16)
+    %set(gcf,'position',1.0e+03 *[0.0016    0.2079    1.4600    0.5120])
+    ax=gca;
+    pcolor(data.deg_137.interp.xcrop,data.deg_137.interp.ycrop,data.deg_137.interp.vmag_cropN)
+    hold on
+    plot(data.deg_137.interp.foil,'facecolor',[0 0 0],'facealpha',0.5...
+        ,'edgecolor','none')
+    axis equal
+    axis tight
+    shading interp
+    caxis([-1,2.5])
+    c=colorbar;
+    c.FontSize=12;
+    % set(c,'position',[0.7585    0.0513    0.0180    0.4074])
+    set(get(c,'title'),'string','$(\frac{V_{mag}}{U_\infty})$','interpreter','latex');
+    xlabel('x/c')
+    ylabel('y/c')
+    title(['N   \lambda = ' num2str(lambda) ])
+end
 %% Vel field plotting- plain
 % if plain
 % figure
